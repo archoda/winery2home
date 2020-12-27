@@ -1,0 +1,11 @@
+# Git Ignore Rules
+# https://www.atlassian.com/git/tutorials/saving-changes/gitignore
+
+# Ignore Everything in the WP upfront
+/*
+
+# But not these files...
+!.gitignore
+!README.md
+!wp-config.php
+!*wp-content
