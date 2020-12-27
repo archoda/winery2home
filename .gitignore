@@ -7,5 +7,6 @@
 # But not these files...
 !.gitignore
 !README.md
+!.vscode
 !wp-config.php
 !*wp-content
