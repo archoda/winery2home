@@ -20,7 +20,7 @@
 
 // ** MySQL settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
-define( 'DB_NAME', 'wpw2h_winery2home' );
+define( 'DB_NAME', 'wp_winery2home' );
 
 /** MySQL database username */
 define( 'DB_USER', 'w2hadmin' );
@@ -107,41 +107,41 @@ require_once ABSPATH . 'wp-settings.php';
  * Summary: Import the required Archoda theme configuration file(s);
  * @since 1.0.0
  */
-require_once ABSPATH . 'wp-content/themes/winery2home/classes/archoda.php';
-require_once ABSPATH . 'wp-content/themes/winery2home/classes/archoda-error.php';
-require_once ABSPATH . 'wp-content/themes/winery2home/classes/archoda-emailer.php';
+// require_once ABSPATH . 'wp-content/themes/winery2home/classes/archoda.php';
+// require_once ABSPATH . 'wp-content/themes/winery2home/classes/archoda-error.php';
+// require_once ABSPATH . 'wp-content/themes/winery2home/classes/archoda-emailer.php';
 
 /**
  * Summary: Register the Archoda superglobals
  * @since 1.0.0
  */
-global $ARCHODA;
-global $ARCHODA_ERROR;
+// global $ARCHODA;
+// global $ARCHODA_ERROR;
 
 /**
  * Summary: Init the the archoda superglobals
  * @since 1.0.0
  */
-$ARCHODA = new ARCHODA();
+// $ARCHODA = new ARCHODA();
 
 
 /**
  * Summary: Set Archoda error handler based on WP shutdown and override error page and display
  * @since 1.0.0
  */
-add_filter('shutdown', function() {
+// add_filter('shutdown', function() {
 	
-	// Initialize error capture
-	$ARCHODA_ERROR = new ARCHODA_ERROR();
+// 	// Initialize error capture
+// 	$ARCHODA_ERROR = new ARCHODA_ERROR();
 
-	// Show output to screen when in debug mode
-	if (WP_DEBUG)
-	{
-		print_r($ARCHODA_ERROR->Error_Handle());
-	}
+// 	// Show output to screen when in debug mode
+// 	if (WP_DEBUG)
+// 	{
+// 		print_r($ARCHODA_ERROR->Error_Handle());
+// 	}
 
-	//$ARCHODA_EMAILER = new ARCHODA_EMAILER();
-});
+// 	//$ARCHODA_EMAILER = new ARCHODA_EMAILER();
+// });
 
 // /** Step 2 (from text above). */
 // add_action( 'admin_menu', 'my_plugin_menu' );
@@ -161,6 +161,7 @@ add_filter('shutdown', function() {
 // 	echo '</div>';
 // }
 
+/*
 add_action('admin_menu', 'archoda_register_options');
 
 function archoda_register_options() {
@@ -178,5 +179,5 @@ function archoda_initialize_options() {
 <?php } 
 
 //throw new Exception('err1');
-
+*/
 ?>
