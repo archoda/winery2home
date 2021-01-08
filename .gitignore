@@ -9,4 +9,5 @@
 !README.md
 !.vscode
 !wp-config.php
-!*wp-content
+!*wp-content/themes/winery2home
+!*wp-content/plugins/archoda
