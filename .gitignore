@@ -9,5 +9,15 @@
 !README.md
 !.vscode
 !wp-config.php
-!*wp-content/themes/winery2home
-!*wp-content/plugins/archoda
+
+# Don't ignore these directories
+!wp-themes
+!wp-content
+
+# Don't ignore his specific theme
+wp-content/themes/*
+!wp-content/themes/winery2home
+
+# Don't ignore his specific plugin
+wp-content/plugins/*
+!wp-content/plugins/archoda

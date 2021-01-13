@@ -40,9 +40,8 @@ defined( 'ABSPATH' ) OR exit;
 
 
 
-// Require plugin classes
-require_once( __DIR__ . '/classes/archoda.php');
-
+// Require core class
+require_once( __DIR__ . '/classes/archoda-wp.php');
 
 
 // Manage plugin work
@@ -54,29 +53,75 @@ $ARC = new \ARCHODA\WP();
 
 
 
-function WP_Regsiter_Activation_Hook()
+function WP_Register_Activation_Hook()
 {
-    $GLOBALS['ARC']->WP_Register( [
-        'name' => 'Archoda',
-        'plugin' => $_REQUEST['plugin'],
-        'file' => __FILE__
+    $GLOBALS['ARC']->WP_Register_Activation_Hook( [
+        'Registered' => true,
+        'Name' => 'Archoda',
+        'File' => __FILE__,
+        'Path' => $_REQUEST['plugin']
     ] );
 
-    # Uncomment the following line to see session test function in action
-    $_SESSION['Test'] = ':: $_SESSION[\'Test\'] => Success ::';
-    # die( 'Test :: ' . $_SESSION['yest'] . ' :: ' . $GLOBALS['ARC']->WP_Plugin_Name);
+    // Uncomment the following line to see session test function in action
+    // $_SESSION['Register_Test_Activation'] = ':: $_SESSION[\'Register_Test_Activation\'] => Success ::';
+    // die( 'Register_Test_Activation :: ' . $_SESSION['Register_Test_Activation'] . ' :: ' . $GLOBALS['ARC']->WP_Plugin_Name);
 }
 
+function WP_Register_Deactivation_Hook()
+{
+    $GLOBALS['ARC']->WP_Register_Deactivation_Hook( [
+        'Registered' => false,
+        'Name' => 'Archoda',
+        'File' => __FILE__,
+        'Path' => $_REQUEST['plugin']
+    ] );
 
+    // Uncomment the following line to see session test function in action
+    // $_SESSION['Register_Test_Deactivation'] = ':: $_SESSION[\'Register_Test_Deactivation\'] => Success ::';
+    // die( 'Register_Test_Deactivation :: ' . $_SESSION['Register_Test_Deactivation'] . ' :: ' . $GLOBALS['ARC']->WP_Plugin_Name);
+}
 
-register_activation_hook(   __FILE__ ,  'WP_Regsiter_Activation_Hook' );
+function WP_Register_Uninstall_Hook()
+{
+    // Destroy the object
+    global $ARC;
+    $ARC = null;
 
+    // Uncomment the following line to see session test function in action
+    // $_SESSION['Register_Test_Uninstall'] = ':: $_SESSION[\'Register_Test_Uninstall\'] => Success ::';
+    // die( 'Register_Test_Uninstall :: ' . $_SESSION['Register_Test_Uninstall'] . ' :: ' . $GLOBALS['ARC']->WP_Plugin_Name);
+}
 
+function WP_Admin_Enqueue_Styles()
+{
+    $GLOBALS['ARC']->WP_Register_Enqueue_Styles( [
+        [
+            'Handle' => 'archoda',
+            'File' => plugin_dir_url( __FILE__ ) . 'assets/css/archoda-wp-custom-field-views.css',
+        ]
+    ] );
+}
 
-add_action( 'admin_menu' , function() {
+// WP Register activation
+register_activation_hook( __FILE__ , 'WP_Register_Activation_Hook' );
 
-    # Uncomment the following line to see session test function in action
-    echo $_SESSION['Test'];
-});
+// WP Register deactivatiom
+register_deactivation_hook( __FILE__ , 'WP_Register_Deactivation_Hook' );
+
+// WP Register uninstallation
+register_uninstall_hook( __FILE__ , 'WP_Register_Uninstall_Hook' );
+
+// WP Enqueue Styles
+add_action( 'admin_enqueue_scripts' , 'WP_Admin_Enqueue_Styles' );
+
+// WP Enqueue Scripts
+// add_action( 'wp_enqueue_scripts', 'WP_Admin_Enqueue_Scripts' );
+
+// WP Model Init
+
+// WP Controller Init
+$ARC->WP_Initialize();
+
+// WP View Init
 
 ?>
