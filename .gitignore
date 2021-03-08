@@ -8,16 +8,16 @@
 !.gitignore
 !README.md
 !.vscode
-!wp-config.php
+#!wp-config.php
 
 # Don't ignore these directories
-!wp-themes
-!wp-content
+#!wp-themes
+#!wp-content
 
 # Don't ignore his specific theme
-wp-content/themes/*
-!wp-content/themes/winery2home
+#wp-content/themes/*
+#!wp-content/themes/winery2home
 
 # Don't ignore his specific plugin
-wp-content/plugins/*
-!wp-content/plugins/archoda
+#wp-content/plugins/*
+#!wp-content/plugins/archoda
