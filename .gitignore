@@ -2,22 +2,21 @@
 # https://www.atlassian.com/git/tutorials/saving-changes/gitignore
 
 # Ignore Everything in the WP upfront
-/*
+#/*
+/*.php
+/*.txt
+/*.html
+wp-admin
+wp-content/*
+wp-includes/*
+Wp-plugins/*
 
 # But not these files...
 !.gitignore
 !README.md
 !.vscode
-#!wp-config.php
+!wp-config.php
 
-# Don't ignore these directories
-#!wp-themes
-#!wp-content
-
-# Don't ignore his specific theme
-#wp-content/themes/*
-#!wp-content/themes/winery2home
-
-# Don't ignore his specific plugin
-#wp-content/plugins/*
-#!wp-content/plugins/archoda
+# Don't ignore these
+!wp-content/themes
+wp-content/themes/index.php
