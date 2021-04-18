@@ -1,0 +1,217 @@
+
+# https://report-uri.com/
+# https://httpd.apache.org/docs/current/expr.html
+# https://httpd.apache.org/docs/2.4/rewrite/flags.html
+# https://httpd.apache.org/docs/current/mod/mod_rewrite.html
+
+# ------------------------------------------------------------------------------
+# | SECURITY CONTROL (HEADERS) - Test @ https://securityheaders.com/            |
+# ------------------------------------------------------------------------------
+
+#Remove the footer from error pages, which details the version numbers:
+#Reduce Server HTTP Header to the minimum product (Apache) rather than showing detailed version information of the server and operating system
+ServerSignature Off
+
+# Hide X-Powered-By and Server headers, sent by downstream application servers:
+# Note you need both below as the "always" one doesn't work with Jboss for some reason
+Header always unset "X-Powered-By"
+Header unset "X-Powered-By"
+
+# Cache-Control(s), Pragma, Expires SET IN DIR/FILE & STATIC ASSET MIME-TYPES BELOW
+ # Permission Policy (Formerly: Feature Policy)
+# Helpful Info: https://scotthelme.co.uk/a-new-security-header-feature-policy/
+# Dev Moz Info: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy
+#---------------------------------------
+# Feature Policy is being created to allow site owners to enable and disable certain web platform features on their 
+# own pages and those they embed. Being able to restrict the features your site can use is really nice but being able 
+# to restrict features that sites you embed can use is an even better protection to have.
+#---------------------------------------
+Header set Permissions-Policy: "camera=(), microphone=()"
+
+# Legacy Feature Policy
+# Helpful Info: https://www.w3.org/TR/permissions-policy-1/
+# Helpful Info: https://scotthelme.co.uk/goodbye-feature-policy-and-hello-permissions-policy/
+Header set Feature-Policy: "camera; microphone;"
+
+# Referrer Policy
+# Helpful Info: https://scotthelme.co.uk/a-new-security-header-referrer-policy/
+#---------------------------------------
+# When a user clicks a link on one site, the origin, that takes them to another site, the destination, the destination 
+# site receives information about the origin the user came from. This is how we get metrics like those provided by 
+# Google Analytics on where our traffic came from. I know that 4,000 users came from Twitter this week because when they 
+# visit my site they set the referer[sic] header in their request.
+#---------------------------------------
+Header set Referrer-Policy: "strict-origin"
+
+# Strict Transport Security Policy
+# Dev Moz Info: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+#---------------------------------------
+Header set Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
+
+# X-Frame-Options
+# Helpful Info: https://scotthelme.co.uk/hardening-your-http-response-headers/#x-frame-options
+#---------------------------------------
+# The X-Frame-Options header (RFC), or XFO header, protects your visitors against clickjacking attacks when using iFrames.
+#---------------------------------------
+Header set X-Frame-Options: "DENY"
+
+# X-XSS-Protection
+# Helpful Info: https://scotthelme.co.uk/hardening-your-http-response-headers/#x-xss-protection
+#---------------------------------------
+# This header is used to configure the built in reflective XSS protection found in Internet Explorer, Chrome and Safari (Webkit).
+#---------------------------------------
+Header set X-XSS-Protection: "1; mode=block;"
+
+# X-Content-Type-Option
+# Helpful Info: 
+# https://scotthelme.co.uk/hardening-your-http-response-headers/#x-content-type-options
+# https://scotthelme.co.uk/content-security-policy-an-introduction/
+#---------------------------------------
+# It prevents Google Chrome and Internet Explorer from trying to mime-sniff the content-type of a response away from the one 
+# being declared by the server. It reduces exposure to drive-by downloads and the risks of user uploaded content that, with 
+# clever naming, could be treated as a different content-type, like an executable.
+#---------------------------------------
+Header set X-Content-Type-Options: "nosniff"
+
+# Content-Security-Policy
+# Helpful Info: https://scotthelme.co.uk/content-security-policy-an-introduction/
+# Dev Moz Info: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+# Dev Moz Info: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src
+#---------------------------------------
+# A CSP header allows you to define approved sources for content on your site that the browser can load. By specifying 
+# only those sources that you wish the browser to load content from, you can protect your visitors from a whole range 
+# of issues. Here is a basic CSP response header.
+#---------------------------------------
+# Added 'unsafe-eval' for framework bundle to work - https://stackoverflow.com/questions/53991240/uncaught-evalerror-refused-to-evaluate-a-string-as-javascript-because-unsafe
+Header set Content-Security-Policy: "script-src https: *.winery2home.com googletagmanager.com google-analytics.com *.hotjar.com 'unsafe-inline' 'unsafe-eval'; frame-ancestors https://www.winery2home.com https://static.hotjar.com; report-uri /_/csp-reports"
+
+# Access-Control-Allow-Origin
+# The Access-Control-Allow-Origin response header indicates whether the response can be shared with requesting code from the given origin.
+# Dev Moz Info: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin
+#---------------------------------------
+Header set Access-Control-Allow-Origin: *
+
+# ------------------------------------------------------------------------------
+# | DEFLATE CONTROL (Index Files)                                               |
+# ------------------------------------------------------------------------------
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE application/x-httpd-php
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE application/rss+xml
+  AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+  AddOutputFilterByType DEFLATE application/x-font
+  AddOutputFilterByType DEFLATE application/x-font-opentype
+  AddOutputFilterByType DEFLATE application/x-font-otf
+  AddOutputFilterByType DEFLATE application/x-font-truetype
+  AddOutputFilterByType DEFLATE application/x-font-ttf
+  AddOutputFilterByType DEFLATE application/x-javascript
+  AddOutputFilterByType DEFLATE application/xhtml+xml
+  AddOutputFilterByType DEFLATE application/xml
+  AddOutputFilterByType DEFLATE font/opentype
+  AddOutputFilterByType DEFLATE font/otf
+  AddOutputFilterByType DEFLATE font/ttf
+  AddOutputFilterByType DEFLATE image/svg+xml
+  AddOutputFilterByType DEFLATE image/x-icon
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/javascript
+  AddOutputFilterByType DEFLATE text/plain
+  AddOutputFilterByType DEFLATE text/xml
+</IfModule>
+
+# ------------------------------------------------------------------------------
+# | CACHE CONTROL (Index Files)                                                 |
+# ------------------------------------------------------------------------------
+
+<ifModule mod_headers.c>
+
+    # ------------------------------------------------------------------------------
+    # | Index Files                                                                 |
+    # ------------------------------------------------------------------------------
+    <FilesMatch "^index.(html|php)$">
+        FileEtag None
+        Header Unset ETag
+        Header Set Cache-Control: "max-age=0, no-store, must-revalidate"
+        Header Set Pragma: "no-cache"
+        Header set Expires: "Mon, 28 Jun 1976 06:28:00 GMT"
+        # The Expire date is set to past to force new read.
+        # -----
+        # DID YOU ALSO KNOW the date is also a significant historical 
+        # date as it's the birth date of this sites developer, Joe? 
+        #
+        # We're sure you're wondering 'why on earth would he do that'
+        # and then bother to write this long commentary about it 
+        # that I'm now reading? Well, consider it like an 'I was here sign'
+        # using insignificant 'digital' cave art (you'll have to decipher 
+        # the 'why?' on your own) that mostly no other dev will read 
+        # for a long time. If ever, really. 
+        # 
+        # What's really important is that Joe is...was??...depending on the date 
+        # you're reading this - lol...where were we? Oh yes, Joe, a really swell,
+        # awesome, freakishly handsome, smart, multi-talented, and most 
+        # importantly HUMBLE PERSON who got bored doing the mundane task for this 
+        # custom  ecommmerce webapp before the total collapse of humanity.
+        #
+        # Coding can be a cold, dark and lonely job...
+        #
+        # Well, we hope you enjoyed this little story and it made you smile!
+        # 
+        # P.S. DON'T CHANGE IT - EVER!
+    </FilesMatch>
+
+    # ------------------------------------------------------------------------------
+    # | CACHE CONTROL (Static Assets)                                               |
+    # ------------------------------------------------------------------------------
+    <FilesMatch "\.(webmanifest|zip|ico|pdf|webp|jpg|png|gif|svg|mp4|css|js|otf|ttf|woff|woff2|eot)$">
+        FileEtag None
+        Header set Cache-Control: "max-age=3600, no-store, must-revalidate"
+        Header Set Pragma: "no-cache"
+        #Header set Expires: "Mon, 28 Jun 3021 06:28:00 GMT"
+    </FilesMatch>
+</ifModule>
+
+# ------------------------------------------------------------------------------
+# | Compression (Enables Gzip)                                                 |
+# ------------------------------------------------------------------------------
+
+<IfModule mod_headers.c>
+    # Serve gzip compressed CSS and JS files if they exist
+    # and the client accepts gzip.
+    RewriteCond "%{HTTP:Accept-encoding}" "gzip"
+    RewriteCond "%{REQUEST_FILENAME}\.gz" -s
+    RewriteRule "^(.*)\.(html|xml|css|js)" "$1\.$2\.gz" [QSA]
+
+    # Serve correct content types, and prevent mod_deflate double gzip.
+    RewriteRule "\.html\.gz$"  "-" [T=text/html,E=no-gzip:1]
+    RewriteRule "\.xml\.gz$"  "-" [T=text/xml,E=no-gzip:1]
+    RewriteRule "\.css\.gz$" "-" [T=text/css,E=no-gzip:1]
+    RewriteRule "\.js\.gz$"  "-" [T=text/javascript,E=no-gzip:1]
+
+    <FilesMatch "(\.html\.gz|\.php\.gz|\.css\.gz|\.js\.gz)$">
+      # Serve correct encoding type.
+      Header append Content-Encoding gzip
+
+      # Force proxies to cache gzipped &
+      # non-gzipped css/js files separately.
+      Header append Vary Accept-Encoding
+    </FilesMatch>
+</IfModule>
+
+# ------------------------------------------------------------------------------
+# | REWRITE CONTROL (Force HTTPs, and ./index(html|php))                        |
+# ------------------------------------------------------------------------------
+
+<ifModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP_HOST} ^www\. [NC]
+    RewriteCond %{HTTP_HOST} ^(?:www\.)?(.+)$ [NC]
+    RewriteRule ^ https://%1%{REQUEST_URI} [L,NE,R=301]
+    RewriteCond %{REQUEST_FILENAME} -s [OR]
+    RewriteCond %{REQUEST_FILENAME} -l [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteCond %{REQUEST_URI} !^(lib|wp)
+    RewriteRule ^.*$ - [NC,L]
+    RewriteRule ^(.*) /index.php [NC,L]
+</ifModule>

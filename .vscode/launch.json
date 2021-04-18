@@ -5,13 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Chrome",
-            "request": "launch",
-            "type": "pwa-chrome",
-            "url": "https://winery2home:8890/wp-admin/plugins.php",
-            "webRoot": "${workspaceFolder}"
-        },
-        {
             "name": "Attach to Chrome",
             "port": 9222,
             "request": "attach",
@@ -19,18 +12,11 @@
             "webRoot": "${workspaceFolder}"
         },
         {
-            "name": "Listen for XDebug",
-            "type": "php",
+            "type": "pwa-chrome",
             "request": "launch",
-            "port": 9000
-        },
-        {
-            "name": "Launch currently open script",
-            "type": "php",
-            "request": "launch",
-            "program": "${file}",
-            "cwd": "${fileDirname}",
-            "port": 9000
+            "name": "Launch Chrome against localhost",
+            "url": "https://svelte.winery2home:8890/age-check",
+            "webRoot": "${workspaceFolder}"
         }
     ]
 }

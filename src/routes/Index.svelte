@@ -1,0 +1,429 @@
+
+<script>
+    /* LOOK INTO THIS FOR ROUTING
+    https://routify.dev/
+    https://easyroute.lyoha.info/page/navigation-guards?lang=en
+     */
+
+    /*
+        Imports
+    */
+
+    import { onMount } from 'svelte';
+    import { Router, Route } from 'svelte-routing';
+    import { Store } from '../lib/js/store.js';
+    import anime from 'animejs';
+    import { transition } from '../lib/js/transition.js';
+
+    /* 
+        Import Page/Routes
+    */
+    import PageNotFound from './Page-Not-Found.svelte';
+    import Home from './Home.svelte';
+    import Shop from './Shop.svelte';
+    import HowItWorks from './How-It-Works.svelte';
+    import AboutUs from './About-Us.svelte';
+    import AccountLogin from './Account-Login.svelte';
+    import ShoppingCart from './Shopping-Cart.svelte';
+    import ContactUs from './Contact-Us.svelte';
+    import PrivacyPolicy from './Privacy-Policy.svelte';
+    import TermsOfService from './Terms-Of-Service.svelte';
+    import AgeCheck from './Age-Check.svelte';
+    import AgeCheckDenied from './Age-Check-Denied.svelte';
+
+    /*
+      Import Components
+    */
+    import LoaderCircle from '../components/Loader-Circle.svelte';
+    import ButtonMenu from '../components/Button-Menu.svelte';
+    import ButtonClose from '../components/Button-Close.svelte';
+
+
+    /*
+        Exports
+    */
+    // Used By Svelte-Routing
+    export let url = '';
+
+    export let ButtonMenuElement;
+
+    /*
+         Loader Component Controls
+    */
+    let LoaderCircleInstance;
+
+    function LoaderCompleteCallback(event)
+    {
+        Store.api.wineries = event.detail.data;
+
+        let loader = document.getElementById('loader');
+
+        // Show the page elements
+        if (!document.getElementById('main').classList.value.indexOf('age-check') > -1)
+        {
+            anime({
+                targets: 'header, .page, footer',
+                opacity: [0, 1],
+                duration: 250,
+                direction: 'forward',
+                easing: 'linear',
+                loop: false,
+                begin: () =>
+                {
+                    loader.classList.add('hidden');
+                    loader.style.marginTop = -1000000000 + 'vw';
+                },
+            });
+        }
+        //LoaderCircleInstance.LoaderCircleReInit();
+    }
+
+     /*
+         ButtonMenu Component Controls
+    */
+
+    export let ButtonMenuInstance;
+
+    function ButtonMenuInstanceClickCallback(event)
+    {  
+        let nav = document.getElementById('nav');
+
+        if (nav.classList.value.indexOf('hidden') > -1)
+        {
+             anime({
+                targets: nav,
+                opacity: {
+                    value: [0, 1],
+                    duration: 250,
+                    direction: 'forward',
+                    easing: 'linear',
+                },
+                begin: () =>
+                {
+                    nav.classList.remove('hidden');
+                    nav.style.marginTop = 0;
+                },
+                loop: false,
+            });
+        }
+        else
+        {
+            anime({
+                targets: nav,
+                opacity: {
+                    value: [1, 0],
+                    duration: 250,
+                    direction: 'forward',
+                    easing: 'linear',
+                },
+                complete: () =>
+                {
+                    nav.classList.add('hidden');
+                    nav.style.marginTop = -1000000000 + 'vw';
+                },
+                loop: false,
+            });
+        }
+    }
+
+    /*
+         ButtonClose Component Controls
+    */
+
+    let ButtonCloseInstance;
+
+    function ButtonCloseInstanceClickCallback(event)
+    {
+        console.log('close button called')
+    }
+
+    onMount(() =>
+    {
+        
+    });
+</script>
+
+<!--<div id="os" class="os">
+    <picture>
+        <source srcset="./lib/images/_onionskin-home-desktop.jpg" media="(min-width: 768px)" />
+        <source srcset="./lib/images/_onionskin-home-mobile.jpg" />
+        <img src="./lib/images/_onionskin-home-mobile.jpg" alt="onionskin"/>
+    </picture>
+</div>-->
+
+<ButtonMenu bind:this="{ButtonMenuInstance}" classColor={"#900A4A"} on:click={ButtonMenuInstanceClickCallback} />
+<ButtonClose bind:this="{ButtonCloseInstance}" classColor={"white"} on:click={ButtonCloseInstanceClickCallback} />
+<LoaderCircle bind:this="{LoaderCircleInstance}" classColor={"#FFFFFF"} FetchOptions={[Store.env.apiRoot + '/wp/wp-json/wineries/products?cache=no']} on:message={LoaderCompleteCallback} />
+
+<!-- Accessible Skip Main Link -->
+<!-- http://web-accessibility.carnegiemuseums.org/code/skip-link/#:~:text=A%20skip%20(navigation)%20link%20provides,often%20be%20many%20navigation%20links.&text=A%20skip%20link%20is%20a,immediate%20access%20to%20pertinent%20content. -->
+<a id='nav-skip' class='sronly' href='#main'>
+    Skip Navigation or Skip to Content
+</a>
+
+<nav id="nav" class="nav nav-main hidden" aria-label="main-menu" aria-expanded="false" aria-controls="menu-list" aria-haspopup="false">
+    <ul role="menu">
+        <li role="menuitem"><a href="/" tabindex="-1" title="Home" use:transition>Home</a></li>
+        <li role="menuitem"><a href="/shop" tabindex="-1" title="Shop" use:transition>Shop</a></li>
+        <li role="menuitem"><a href="/join" tabindex="-1" title="Join">Join</a></li>
+        <li role="menuitem"><a href="/how-it-works" tabindex="-1" title="How It Works" use:transition>How It Works</a></li>
+        <li role="menuitem"><a href="/about-us" tabindex="-1" title="About Us" use:transition>About Us</a></li>
+    </ul>
+    <ul role="menu">
+        <li role="menuitem"><a href="/shopping-cart" tabindex="-1" title="Shopping Cart" use:transition>Shopping Cart</a></li>
+        <li role="menuitem"><a href="/account-login" tabindex="-1" title="Account Login" use:transition>Account Login</a></li>
+        <li role="menuitem"><a href="/contact-us" tabindex="-1" title="Contact Us" use:transition>Contact Us</a></li>
+        <li role="menuitem"><a href="/privacy-policy" tabindex="-1" title="Privacy Policy" use:transition>Privacy Policy</a></li>
+        <li role="menuitem"><a href="/terms-of-service" tabindex="-1" title="Terms of Service" use:transition>Terms of Service</a></li>
+        <li role="menuitem"><a href="/bad-path" tabindex="-1" title="Bad Path" use:transition>Bad Path</a></li>
+    </ul>
+</nav>
+
+<header id="header" class="header hidden">
+ 
+    <a href="/" class="logo" title="home" use:transition>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 264 197.198">
+            <g id="W2HLogo" transform="translate(-66.746 -35.695)">
+              <g id="LogoText" transform="translate(66.746 125.076)">
+                <path id="2" data-name="2" d="M145.074,281.083c11.821,0,16.647,5.946,16.647,13.779,0,5.946-3.147,11.191-13.36,21.753l-9.232,9.652h11.961c4.476,0,5.246-.28,5.945-3.077l.49-4.477c.21-.909.489-1.188,1.539-1.188h3.008c1.049,0,1.119.489.979,1.329L162.07,329.9c-.21,2.169-.77,2.309-2.379,2.309H130.525c-1.049,0-1.4-.28-1.4-1.4v-2.028c0-1.469.56-2.168,2.448-4.057l11.541-12.1c8.6-8.883,10.492-12.94,10.492-17.486,0-4.827-2.309-8.394-8.464-8.394a14.184,14.184,0,0,0-7.694,2.1,4.785,4.785,0,0,1,1.959,4.056,4.9,4.9,0,0,1-5.176,4.967,4.592,4.592,0,0,1-4.686-4.826C129.546,286.119,135.421,281.083,145.074,281.083Z" transform="translate(-92.225 -225.305)" fill="#93014a"/>
+                <path id="Winery" d="M89.828,229.6,99.34,188.47c.35-1.469.419-1.679,1.4-1.679h6.015c.979,0,.979.35,1.4,1.749l10.352,39.1,7.973-32.1a8.936,8.936,0,0,0,.35-1.959c0-1.259-.909-1.4-3.778-1.4-.909,0-1.258-.419-1.258-1.259v-2.938c0-1.049.07-1.19,1.539-1.19H137.25c.909,0,1.119.21,1.119,1.259v2.8c0,.7-.07,1.329-1.119,1.329-3.567,0-3.917.14-4.826,3.847L121.863,236.1c-.42,1.539-.63,1.749-2.029,1.749h-5.316c-1.259,0-1.469-.7-1.749-1.749l-9.722-37.77L94.514,236.1c-.35,1.539-.7,1.749-1.749,1.749H85.7c-.909,0-1.4-.28-1.749-1.678L72.9,195.954c-.979-3.567-1.4-3.777-4.336-3.777-1.609,0-1.819-.35-1.819-1.749v-2.448c0-.98.21-1.19,1.189-1.19H84.722c.979,0,1.189.28,1.189,1.19v3.007c0,.77-.21,1.189-1.049,1.189-3.077,0-4.057.07-4.057,1.4a10.684,10.684,0,0,0,.35,2.1Zm53.915-33.24a4.57,4.57,0,0,0,4.729-4.754c0-2.8-1.892-4.69-4.162-4.69-2.585,0-4.6,2.02-4.6,5.015C139.708,194.73,141.473,196.358,143.743,196.358ZM196.372,231.7a13.4,13.4,0,0,1-2.448.35c-1.4,0-2.1-.979-2.1-3.078V211.482c0-8.813-4.826-12.24-11.4-12.24-5.736,0-10.562,2.308-12.52,7.414V201.9c0-1.4-.28-1.959-1.539-1.959l-9.792.56c-1.049.07-1.329.35-1.329,1.329V204.7c0,.839.28,1.259,1.189,1.259,3.917,0,4.476.42,4.476,2.518V228.9c0,2.588-.769,3.008-3.077,3.008h-5.881c-2.308,0-3.077-.42-3.077-3.008v-27c0-1.4-.35-1.959-1.609-1.959l-10.212.629c-.979.07-1.259.209-1.259,1.329v2.588c0,.839.14,1.4,1.259,1.468l2.378.07c1.4.07,1.959.559,2.028,2.028V228.9c0,2.588-.77,3.008-3.078,3.008H136.7c-1.119,0-1.259.28-1.259,1.049v3.078c0,.979.279,1.259,1.259,1.259H173.08c.98,0,1.329-.28,1.329-1.259v-3.078c0-.769-.21-1.049-1.329-1.049H171.4c-2.309,0-3.078-.42-3.078-3.008V220.5c0-9.512,3.217-15.038,9.582-15.038,4.686,0,6.5,2.938,6.5,7.134v17.906c0,5.875,3.777,7.134,6.925,7.134a12.486,12.486,0,0,0,4.9-.629,1.4,1.4,0,0,0,.98-1.469V232.4C197.211,231.7,196.931,231.626,196.372,231.7Zm32.5-20.7c0,6.855-4.546,11.541-14.758,11.541a33.461,33.461,0,0,1-9.232-1.329c.489,7.834,3.846,10.911,11.33,10.911a25.107,25.107,0,0,0,9.373-1.748,10.781,10.781,0,0,1,2.658-1.049c.559,0,.7.28.7.979v3.078c0,.979-.209,1.4-1.4,2.028-2.518,1.329-7.064,2.378-11.96,2.378-13.219,0-18.536-7.624-18.536-18.885,0-11.751,5.875-19.655,17.416-19.655C223.764,199.241,228.87,203.578,228.87,210.992ZM204.88,216.1a36.011,36.011,0,0,0,8.6,1.259c5.456,0,8.534-2.168,8.534-6.435,0-4.2-2.658-6.364-7.554-6.364C209.216,204.558,205.578,207.985,204.88,216.1Zm27.251-10.142c-.909,0-1.19-.419-1.19-1.259v-2.868c0-.979.28-1.259,1.329-1.329l10.142-.56c1.259,0,1.608.56,1.608,1.959v7.344c.98-3.427,4.127-10,11.751-10,5.106,0,7.2,2.8,7.2,6.785a4.508,4.508,0,0,1-4.546,4.616,4.4,4.4,0,0,1-3.917-5.945c-6.715.21-10.492,10.072-10.492,17.486V228.9c0,2.588.77,3.008,3.078,3.008h3.077c1.119,0,1.329.28,1.329,1.049V236.1c0,.909-.28,1.189-1.329,1.189H231.851c-.98,0-1.259-.28-1.259-1.259v-3.078c0-.839.21-1.049,1.259-1.049h1.608c2.308,0,3.148-.56,3.148-3.008V208.474C236.607,206.376,236.048,205.956,232.131,205.956ZM269.368,242.4a4.248,4.248,0,0,1,4.266,4.477,4.635,4.635,0,0,1-2.028,3.847,8.63,8.63,0,0,0,1.4.14c3.077,0,5.6-1.679,7.344-6.715l1.539-4.407L270,209.383c-1.329-3.007-1.539-3.357-3.777-3.357h-.909c-1.049,0-1.259-.629-1.259-1.4V201.76c0-.98.279-1.189,1.259-1.189h15.948c.979,0,1.188.209,1.188,1.259v2.8c0,.7-.279,1.329-1.188,1.329H280c-1.678,0-2.378.14-2.378.98a7.191,7.191,0,0,0,.56,2.1l7.2,20.7,7.414-20.983c.77-2.378.419-2.8-2.1-2.8h-.839c-1.049,0-1.259-.489-1.259-1.259v-2.868c0-1.049.279-1.259,1.259-1.259H304.2c1.049,0,1.259.209,1.259,1.259v2.658c0,.769-.14,1.468-1.189,1.468h-1.4c-1.818,0-2.588.21-3.637,3.217l-12.869,35.6c-2.728,7.694-6.506,9.933-12.591,9.933-4.826,0-8.742-2.8-8.742-7.624C265.031,244.5,266.64,242.4,269.368,242.4Z" transform="translate(-66.746 -186.791)" fill="#93014a"/>
+                <path id="Home" d="M243.161,304.67V290.82c0-2.658-.7-3.287-2.937-3.287h-1.609c-1.119,0-1.329-.211-1.329-1.12v-2.937c0-1.119.35-1.329,1.329-1.329h16.927c.979,0,1.259.21,1.259,1.329v2.937c0,.909-.21,1.12-1.259,1.12h-1.679c-2.238,0-2.868.419-2.868,3.287v33.153c0,2.868.77,3.288,3.007,3.288h1.539c1.119,0,1.329.21,1.329,1.049v3.078c0,.909-.28,1.259-1.329,1.259H238.615c-.979,0-1.259-.28-1.259-1.259v-3.078c0-.77.209-1.049,1.259-1.049h1.539c2.238,0,3.007-.629,3.007-3.288V310.055H220.569v13.919c0,2.868.769,3.288,3.007,3.288h1.539c1.189,0,1.329.21,1.329,1.049v3.078c0,.909-.28,1.259-1.329,1.259H208.189c-.979,0-1.259-.28-1.259-1.259v-3.078c0-.77.21-1.049,1.259-1.049h1.539c2.238,0,3.007-.629,3.007-3.288V290.82c0-2.658-.7-3.287-2.938-3.287h-1.609c-1.119,0-1.329-.211-1.329-1.12v-2.937c0-1.119.35-1.329,1.329-1.329h16.927c.98,0,1.259.21,1.259,1.329v2.937c0,.909-.209,1.12-1.259,1.12h-1.678c-2.238,0-2.868.419-2.868,3.287V304.67ZM274.89,294.6c12.731,0,17.766,8.743,17.766,19.444,0,10.632-5.035,19.515-17.766,19.515-12.66,0-17.626-8.883-17.626-19.515C257.265,303.34,262.231,294.6,274.89,294.6Zm-9.862,19.515c0,8.533,2.868,14.129,9.862,14.129,7.064,0,9.933-5.6,9.933-14.129,0-8.6-2.868-14.2-9.933-14.2C267.9,299.913,265.028,305.509,265.028,314.112Zm41.8.49v9.652c0,2.588.56,3.007,2.168,3.007h1.469c1.049,0,1.259.21,1.259,1.049v3.078c0,.979-.28,1.259-1.259,1.259H295.008c-.98,0-1.329-.28-1.329-1.259v-3.078c0-.839.21-1.049,1.329-1.049h1.4c2.169,0,3.008-.56,3.008-3.007V303.83c0-2.1-.56-2.518-4.547-2.518-.909,0-1.119-.419-1.119-1.259v-2.868c0-.979.28-1.259,1.259-1.329l10.142-.56c1.329,0,1.679.56,1.679,1.959v3.217c2.1-4.127,6.3-5.875,11.4-5.875,4.756,0,8.6,2.028,10.142,6.854,2.028-4.826,6.574-6.854,12.171-6.854,6.3,0,10.912,3.427,10.912,12.24v17.486c0,2.1.769,3.077,2.168,3.077a13.463,13.463,0,0,0,2.378-.349c.56-.07.839,0,.839.7V330.9a1.4,1.4,0,0,1-.979,1.469,12.738,12.738,0,0,1-4.9.629c-3.217,0-6.925-1.259-6.925-7.134V307.956c0-4.2-1.678-7.064-5.945-7.064-6.015,0-8.953,4.965-8.953,13.709v9.652c0,2.588.77,3.007,2.938,3.007h1.539c1.049,0,1.259.21,1.259,1.049v3.078c0,.979-.279,1.259-1.259,1.259H318.09c-1.049,0-1.259-.28-1.259-1.259v-3.078c0-.839.14-1.049,1.259-1.049h1.4c1.678,0,2.238-.56,2.238-3.007v-16.3c0-4.2-1.679-7.064-5.946-7.064C309.7,300.893,306.829,305.858,306.829,314.6Zm81.078-8.253c0,6.854-4.547,11.541-14.759,11.541a33.466,33.466,0,0,1-9.232-1.329c.489,7.834,3.847,10.912,11.331,10.912a25.106,25.106,0,0,0,9.373-1.749,10.815,10.815,0,0,1,2.658-1.049c.56,0,.7.28.7.979v3.078c0,.98-.21,1.4-1.4,2.028-2.518,1.329-7.065,2.379-11.96,2.379-13.22,0-18.536-7.624-18.536-18.886,0-11.751,5.875-19.654,17.416-19.654C382.8,294.6,387.906,298.933,387.906,306.348Zm-23.991,5.105a36.019,36.019,0,0,0,8.6,1.259c5.456,0,8.534-2.169,8.534-6.435,0-4.2-2.658-6.365-7.555-6.365C368.251,299.913,364.615,303.34,363.915,311.453Z" transform="translate(-123.976 -225.739)" fill="#93014a"/>
+              </g>
+              <g id="LogoMark" transform="translate(105.688 35.695)">
+                <path id="Bottle" d="M304.2,131.371q-.056,5.773-.111,11.547c-.052,1.826-.51,5.844-2.164,7.646-1.558,1.7-7.421,2.014-11.372,2.011l-21.565-.018-51.165-.041-15.462-.012c-3.348,0-6.887.259-9.663-.679-10.6-3.579-11.711-16.1-21.735-19.047-4.261-1.253-18.239-.86-18.239-.86l-14.127.017-.032-14.633h28.61c4.81,0,7.38-2.309,8.581-3.9.632-.838.2-.994-.981-.428a17.419,17.419,0,0,1-7.407,1.752H138.558l-.008-3.407s15.783-.07,20-.067c4.54,0,9.438.348,13.225-.929,8.656-2.92,10.7-14.748,19.443-18.379A25.953,25.953,0,0,1,199.4,90.46l.383-.02v3.613c-.26,0-1.908.008-3.148.1a11.37,11.37,0,0,0-7.145,2.994c-.473.455-.877.868-1.219,1.239-1.548,1.671-.451,1.214,1.316.524a15.408,15.408,0,0,1,3.767-.8c4.346-.386,6.231-.395,6.231-.395h.2V107.6a9.316,9.316,0,0,0-3.091,7.341,8.986,8.986,0,0,0,8.934,8.838c4.637,0,9.562-3.139,9.562-9.273a8.054,8.054,0,0,0-3.048-6.761l-.053-10.026h78.839s4.622-.035,6.788,2.094c2.608,2.565,2.6.454,2.486-.323-.248-1.629-.263-2.97-1.159-3.912-1.348-1.417-8.623-1.521-8.623-1.521H212.07l-.02-3.721.676,0c22.811-.04,74.523-.021,79.639.3,4.192.259,7.184.084,9.266,2.341C305.013,96.631,304.209,120.919,304.2,131.371ZM134.549,110a1.816,1.816,0,0,0-1.949,1.363c-.039,6.712-.017,20.581-.017,20.581a2.153,2.153,0,0,0,2.156,1.676,2.04,2.04,0,0,0,2.082-1.68l-.15-20.613A2.009,2.009,0,0,0,134.549,110Z" transform="translate(-132.577 -58.005)" fill="#151011"/>
+                <path id="Flag" d="M276.567,57.146V35.695h-29.4v50.48a7.436,7.436,0,1,0,8.7.067V57.329Z" transform="translate(-178.101 -35.695)" fill="#93014a" fill-rule="evenodd"/>
+              </g>
+            </g>
+          </svg>          
+    </a>
+</header>
+
+<div id="page" class="page hidden">
+    <div id="page-curtain" class="page-curtain">
+
+        <Router {url}>
+            <Route path="/page-not-found" component={PageNotFound} />
+            <Route path="/" component={Home} />
+            <Route path="/shop" component={Shop} />
+            <Route path="/how-it-works" component={HowItWorks} />
+            <Route path="/about-us" component={AboutUs} />
+            <Route path="/account-login" component={AccountLogin} />
+            <Route path="/shopping-cart" component={ShoppingCart} />
+            <Route path="/contact-us" component={ContactUs} />
+            <Route path="/privacy-policy" component={PrivacyPolicy} />
+            <Route path="/terms-of-service" component={TermsOfService} />
+            <Route path="/age-check" component={AgeCheck} />
+            <Route path="/age-check-denied" component={AgeCheckDenied} />
+        </Router>
+
+        <!-- End Curtain Wrap -->
+    </div>
+<!-- End Page Wrap -->
+</div>
+
+<footer id="footer" class="footer hidden">
+    <p>
+        <a href="/privacy-policy" title="Do Not Sell My Personal Information" use:transition><strong>Do Not Sell My Personal Information</strong></a>
+        <br />@Copyright 2021. All Rights Reserved. Winery2Home, LLC.
+    </p>
+</footer>
+
+<style global lang="scss">
+
+    .os { z-index: 100000; position: absolute; top: 0; left: 0; opacity: .4; margin:0;border:0;padding:0;box-sizing: border-box; }
+    .os img { width:100%; height: auto; }
+
+    /*
+        GLOBAL VARS
+    */
+    
+    $mqMinWidthMobile: 0px;
+    $mqMaxWidthMobile: 767px;
+
+    $mqMinWidthDesktop: 768px;
+    $mqMaxWidthDesktop: 1000000000px;
+
+    :root {
+
+        --primary-white: rgba( 255, 255, 255, 1 ); /* #FFFFFF; */
+
+        --primary-black: rgba( 0, 0, 0, 1 ); /* #000000; */
+
+        --primary-gray: rgba( 173, 171, 163, 1 ); /* #ADABA3; */
+
+        --primary-tan: rgba( 245, 242, 231, 1 ); /* #F5F2E7; */
+        --primary-tan-dark: rgba( 245, 242, 231, 1 ); /* #F5F2E7; */
+        --primary-wine: rgba( 144, 10, 74 , 1 ); /* #900A4A */
+        --primary-wine-dark: rgba( 72 , 5, 37, 1 ); /* #480525 */
+
+    }
+
+    /*
+    GLOBAL RESETS
+    */
+
+    * { box-sizing: border-box; }
+
+    html, body, .page, .page-curtain { width: 100%; height: 100%; margin: 0; border: 0; padding: 0; box-sizing: border-box; }
+
+    html { background-color: var(--primary-tan); }
+    
+    .hidden { opacity: 0; }
+
+    /*
+        GLOBAL SCREEN READER TEXT
+    */
+
+    .sronly { position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .sronly:focus { color: black; display: inline-block; height: auto; width: auto; position: static; margin: auto; }
+
+
+    /*
+        GLOBAL FONTS
+    */
+
+    @font-face {
+        font-family: 'Domine';
+        src: url('../fonts/Domine/Domine-VariableFont_wght.ttf') format('truetype');
+        /*font-display: swap;*/
+    }
+
+    @font-face {
+        font-family: 'Montserrat';
+        src: url('../fonts/Montserrat/Montserrat-Medium.ttf') format('truetype');
+        font-weight: 500;
+        /*font-display: swap;*/
+    }
+
+    @font-face {
+        font-family: 'Montserrat-Light';
+        src: url('../fonts/Montserrat/Montserrat-Light.ttf') format('truetype');
+        font-weight: 300;
+        /*font-display: swap;*/
+    }
+
+    * { font-family: 'Domine', 'Arial', 'Helvetica', sans-serif; color: var(--primary-black); }
+
+    a, abbr, acronym, address, area, article, aside, b, blockquote, body, 
+    button, caption, cite, code, col, colgroup, data, datalist, dd, del, 
+    details, dfn, dialog, div, dl, dt, em, fieldset, figcaption, figure, footer,
+    form, header, input, ins, kbd, label, legend, li, main, mark, meter, nav, 
+    ol, optgroup, option, output, p, param, pre, progress, q, rp, rt, ruby,
+    s, samp, section, select, small, span, strong, sub, summary, sup, textarea,
+    track, u, ul, var, wbr { 
+        font-variation-settings: 'wght' 400; 
+        line-height: 1.28; 
+    }
+
+    *:not(p) { line-height: 1.10; }
+
+    h1,h2 { color: var(--primary-wine); }
+
+    h1,h2,h3,
+    h1 *,h2 *, h3 * { font-family: 'Domine', 'Arial', 'Helvetica', sans-serif; font-variation-settings: 'wght' 500; }
+
+    h4,h5,h6 { font-variation-settings: 'wght' 400 !important; }
+    
+    * *:last-of-type:is(p) { padding-bottom: 0; }
+
+    a, a:active, a:visited, a:focus { text-decoration: none; outline: none; border: none; -moz-outline-style: none; }
+
+    @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
+    {   
+        * { font-size: 3.15vw; }
+
+        h1 .small { font-size: 6vw; }
+        h1, h1 *:not(.small) { font-size: 14.5vw; }
+
+        h1 { margin: 0 0 5vw 0; }
+    }
+
+    @media (min-width: $mqMinWidthDesktop) and (max-width: $mqMaxWidthDesktop)
+    {
+       
+    }
+
+    /*
+        GLOBAL PAGE & PAGE CURTAIN
+    */
+    #page { -webkit-overflow-scrolling: touch; /* Lets it scroll lazy */ }
+
+    @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
+    { 
+        #page { overflow: hidden scroll; clip-path: inset(30vw 0 10vw 0); }
+    }
+
+    /*
+        GLOBAL HEADER
+    */
+
+    header { position: absolute; left: 0; top: 0; }
+
+    header .logo,
+    header .logo svg { width: 100%; height: auto; }
+
+    @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
+    {
+        header .logo svg { min-width: 20vw; max-width: 20vw; margin: 8vw 0 0 5vw; }
+    }
+    /*
+        GLOBAL NAV
+    */
+
+    #nav { z-index: 1000; position: fixed; top: 0; left: 0; margin-top: -100000000vw; }
+
+    @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
+    {
+        #nav { display: flex; width: 100%; height: 100%; background-color: var(--primary-tan); align-items: center; justify-content: center; flex-flow: column; }
+
+        #nav ul,
+        #nav ul li { width: 100%; margin: 0; border: 0; padding: 0; text-align: center; list-style: none; }
+
+        #nav ul:first-of-type li + li { margin-top: 4vw; }
+
+        #nav ul:first-of-type li * { font-size: 8vw; font-variation-settings: 'wght' 500; color: var(--primary-wine); }
+
+        #nav ul:last-of-type { margin-top: 8vw; }
+
+        #nav ul:last-of-type li + li { margin-top: 2.35vw; }
+
+        #nav ul:last-of-type li * { font-size: 5.15vw; color: var(--primary-black); }
+
+        #nav ul:last-of-type li:nth-of-type(3),
+        #nav ul:last-of-type li:last-of-type { margin-top: 5.15vw; }
+    }
+
+    /*
+        GLOBAL FOOTER
+    */
+    
+    footer { position: fixed; width: 100%; text-align: center; }
+    footer *:not(a) { font-size: 2vw; }
+    footer a, footer a * { font-size: 2.5vw; }
+
+    @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
+    {
+        footer { bottom: 1vw; } 
+    }
+
+    @media (min-width: $mqMinWidthDesktop) and (max-width: $mqMaxWidthDesktop)
+    {
+       
+    }
+
+
+    /*
+        GLOBAL MAIN
+    */
+
+    #main { position:relative; display: flex; align-items: center; justify-content: start; flex-flow: column; }
+
+    #main .button { border: none; font-family: 'Montserrat-Light', 'Arial', 'Helvetica', sans-serif; color: var(--primary-black); text-align: center; text-transform: uppercase; }
+
+    #main .button-wine { background-color: var(--primary-wine); color: var(--primary-white); }
+
+    @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
+    {   
+        #main .button { font-size: 3.25vw; padding: 1.75vw 4.75vw; }
+    }
+</style>
