@@ -7,21 +7,25 @@
 #/*.txt
 #/*.html
 /node_modules
-#/public/*
 /public/wp/*.php
 /public/wp/*.json
 /public/wp/*.js
 /public/wp/*.txt
 /public/wp/*.html
-/public/wp/wp-admin/*
-/public/wp/wp-content/*
-/public/wp/wp-includes/*
 /public/wp/node_modules/*
+/public/wp/wp-content/languages/*
+/public/wp/wp-content/*
+/public/wp/wp-admin/*
+/public/wp/wp-includes/*
+
 
 # But not these files...
 !.gitignore
-!README.md
+!/**/*README.md
 !.vscode
 !/public/wp/wp-config.php
-!/public/wp/wp-content/plugins/*
+!/public/wp/wp-content/plugins
+!/public/wp/wp-content/plugins/archoda/*
+!/public/wp/wp-content/themes
 !/public/wp/wp-content/themes/archoda/*
+
