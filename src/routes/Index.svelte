@@ -18,6 +18,7 @@
     /* 
         Import Page/Routes
     */
+
     import PageNotFound from './Page-Not-Found.svelte';
     import Home from './Home.svelte';
     import Shop from './Shop.svelte';
@@ -34,7 +35,7 @@
     /*
       Import Components
     */
-    import LoaderCircle from '../components/Loader-Circle.svelte';
+    import Loader from '../components/Loader.svelte';
     import ButtonMenu from '../components/Button-Menu.svelte';
     import ButtonClose from '../components/Button-Close.svelte';
 
@@ -44,8 +45,6 @@
     */
     // Used By Svelte-Routing
     export let url = '';
-
-    export let ButtonMenuElement;
 
     /*
          Loader Component Controls
@@ -153,7 +152,7 @@
 
 <ButtonMenu bind:this="{ButtonMenuInstance}" classColor={"#900A4A"} on:click={ButtonMenuInstanceClickCallback} />
 <ButtonClose bind:this="{ButtonCloseInstance}" classColor={"white"} on:click={ButtonCloseInstanceClickCallback} />
-<LoaderCircle bind:this="{LoaderCircleInstance}" classColor={"#FFFFFF"} FetchOptions={[Store.env.apiRoot + '/wp/wp-json/wineries/products?cache=no']} on:message={LoaderCompleteCallback} />
+<Loader bind:this="{LoaderCircleInstance}" type={"circle"} classColor={"#FFFFFF"} FetchOptions={[Store.env.apiRoot + '/wp/wp-json/wineries/products?cache=no']} on:message={LoaderCompleteCallback} />
 
 <!-- Accessible Skip Main Link -->
 <!-- http://web-accessibility.carnegiemuseums.org/code/skip-link/#:~:text=A%20skip%20(navigation)%20link%20provides,often%20be%20many%20navigation%20links.&text=A%20skip%20link%20is%20a,immediate%20access%20to%20pertinent%20content. -->
@@ -201,8 +200,7 @@
 <div id="page" class="page hidden">
     <div id="page-curtain" class="page-curtain">
 
-        <Router {url}>
-            <Route path="/page-not-found" component={PageNotFound} />
+        <Router url="{url}">
             <Route path="/" component={Home} />
             <Route path="/shop" component={Shop} />
             <Route path="/how-it-works" component={HowItWorks} />
@@ -214,6 +212,7 @@
             <Route path="/terms-of-service" component={TermsOfService} />
             <Route path="/age-check" component={AgeCheck} />
             <Route path="/age-check-denied" component={AgeCheckDenied} />
+            <Route component={PageNotFound} />
         </Router>
 
         <!-- End Curtain Wrap -->
@@ -326,7 +325,7 @@
     
     * *:last-of-type:is(p) { padding-bottom: 0; }
 
-    a, a:active, a:visited, a:focus { text-decoration: none; outline: none; border: none; -moz-outline-style: none; }
+    a, a:active, a:visited, a:focus { text-decoration: none; border: none; outline: none; outline-style: none; -moz-outline-style: none; }
 
     @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
     {   
@@ -350,7 +349,7 @@
 
     @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
     { 
-        #page { overflow: hidden scroll; clip-path: inset(30vw 0 10vw 0); }
+        /* #page { overflow: hidden scroll; clip-path: inset(30vw 0 10vw 0); } */
     }
 
     /*

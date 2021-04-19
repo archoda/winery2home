@@ -13,6 +13,9 @@
     */
     import W2HLogo from './W2HLogo.svelte';
 
+
+    export let type;
+
     let Fetch = FetchClass;
     let FetchData = null;
     export let FetchOptions;
@@ -122,6 +125,7 @@
 
 </script>
 
+{#if type == "circle" }
 <div id="loader">
     <div id="loader-circle">
         <div id="loader-circle-container">
@@ -141,6 +145,7 @@
         </div>
     </div>
 </div>
+{/if}
 
 <style>
 

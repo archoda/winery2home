@@ -22,23 +22,9 @@ function transitionTriggerMethod(event, bipass = false)
         
         event.preventDefault();
 
-        // Check for 404 Pages - check global Window.__routes set in /svelte-router routes....
-        for (const [key, value] of Object.entries(window.__approutes))
-        {   
-            if (anchor.pathname === value._path && value._path.indexOf('#') === -1)
-            {
-                pageNotFound = false;
-                break;
-            }
-        }
-
-        // Set/Reset the pathname if not a found page...
-        anchor.pathname = (pageNotFound) ? '/page-not-found' : anchor.pathname;
-
         // Perform Page Transistion
         let transitionDelay = setInterval(() => {
             
-        
             navigate(anchor.pathname + anchor.search, { replace: anchor.hasAttribute("replace") });
 
             clearInterval(transitionDelay);

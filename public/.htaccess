@@ -83,7 +83,7 @@ Header set X-Content-Type-Options: "nosniff"
 # of issues. Here is a basic CSP response header.
 #---------------------------------------
 # Added 'unsafe-eval' for framework bundle to work - https://stackoverflow.com/questions/53991240/uncaught-evalerror-refused-to-evaluate-a-string-as-javascript-because-unsafe
-Header set Content-Security-Policy: "script-src https: *.winery2home.com googletagmanager.com google-analytics.com *.hotjar.com 'unsafe-inline' 'unsafe-eval'; frame-ancestors https://www.winery2home.com https://static.hotjar.com; report-uri /_/csp-reports"
+Header set Content-Security-Policy: "default-src 'self' 'unsafe-inline'; script-src https: *.winery2home.com googletagmanager.com google-analytics.com *.hotjar.com 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: *; font-src 'self' data: *; frame-ancestors https://www.winery2home.com https://static.hotjar.com; report-uri /_/csp-reports"
 
 # Access-Control-Allow-Origin
 # The Access-Control-Allow-Origin response header indicates whether the response can be shared with requesting code from the given origin.

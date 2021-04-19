@@ -9,7 +9,6 @@ import replace from '@rollup/plugin-replace';
 import sveltePreprocess from 'svelte-preprocess'
 import { sass, scss, postcss, globalStyle } from 'svelte-preprocess'
 
-
 const production = (process.env.npm_lifecycle_event === 'prod') ? 'prod' : 'dev'; //process.env.ROLLUP_WATCH;
 
 console.log('Build Command: ' + process.env.npm_lifecycle_event);
@@ -53,7 +52,7 @@ export default {
 				css.write('public/lib/css/bundle.css');
 			},
 			preprocess: [
-				//sveltePreprocess({ postcss: true }),
+				sveltePreprocess({ postcss: true }),
 				sass(),
 				scss({ sourceMap: true, }),
 				postcss(),

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "rollup -c -w --environment BUILD:development",
-    "prod": "rollup -c --environment BUILD:production",
+    "build": "rollup -c --environment BUILD:production",
     "start": "sirv public"
   },
   "devDependencies": {
@@ -21,15 +21,15 @@
     "rollup-plugin-livereload": "^1.0.0",
     "rollup-plugin-svelte": "^5.0.3",
     "rollup-plugin-terser": "^5.1.2",
+    "sass": "^1.32.10",
     "sirv-cli": "^1.0.11",
-    "svelte": "^3.37.0"
+    "svelte": "^3.37.0",
+    "svelte-preprocess": "^4.7.1",
+    "svelte-routing": "^1.5.0"
   },
   "dependencies": {
     "@shopify/draggable": "^1.0.0-beta.8",
     "animejs": "^3.2.1",
-    "gsap": "^3.6.1",
-    "sass": "^1.32.8",
-    "svelte-preprocess": "^4.7.0",
-    "svelte-routing": "^1.5.0"
+    "gsap": "^3.6.1"
   }
 }
