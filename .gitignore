@@ -7,6 +7,8 @@
 #/*.txt
 #/*.html
 /node_modules
+/public/lib/css/bundle.css
+/public/lib/css/bundle.css.map
 /public/lib/js/bundle.js
 /public/lib/js/bundle.js.map
 /public/wp/*.php
