@@ -94,10 +94,10 @@ get_header();
 								)
 		]);
 		
-		echo print_r($wpq);
+		//echo print_r($wpq);
 		//echo 'ID = ' . $wpq->posts[0]->ID . '<br />';
 		//echo 'ID = ' . $wpq->posts[1]->ID . '<br />';
-		//echo print_r(get_fields($wpq->posts[0]->ID));
+		echo print_r(get_fields($wpq->posts[0]->ID));
 		//echo print_r(get_fields($wpq->posts[1]->ID));
 
 		// while ( have_posts() ) :

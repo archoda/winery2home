@@ -1,27 +1,12 @@
 import { navigate } from "svelte-routing/src/history.js";
 import { shouldNavigate, hostMatches } from "svelte-routing/src/utils.js";
-import { stop_propagation } from "svelte/internal";
-import { Store } from './store.js';
 
-
-export const TrantitionBeforeCallback = () => { };
-
-function transitionTriggerMethod(event, bipass = false)
+const transitionTriggerMethod = (event, bipass = false) =>
 {
-    
-    let pageNotFound = true;
-
     const anchor = event.currentTarget;
-    console.log('method', event)
-    console.log('anchorTarget', anchor.target)
-    console.log('anchor.pathname', anchor.pathname)
-    // console.log('hostMatches(anchor)', hostMatches(anchor))
-    // console.log('shouldNavigate(event)', shouldNavigate(event))
-
-    if ( bipass === true || (anchor.target === "" && hostMatches(anchor) && shouldNavigate(event) )) {
+    
+    if ( bipass === true || (anchor.target !== "_blank" && hostMatches(anchor) && shouldNavigate(event) )) {
         
-        event.preventDefault();
-
         // Perform Page Transistion
         let transitionDelay = setInterval(() => {
             
@@ -29,15 +14,28 @@ function transitionTriggerMethod(event, bipass = false)
 
             clearInterval(transitionDelay);
 
-        }, Store.animations.page.transition.speed);
+            // console.log('transitionTriggerMethod method', event)
+            // console.log('transitionTriggerMethod anchorTarget', anchor.target)
+            // console.log('transitionTriggerMethod anchor.pathname', anchor.pathname)
+            // console.log('transitionTriggerMethod hostMatches(anchor)', hostMatches(anchor))
+            // console.log('transitionTriggerMethod shouldNavigate(event)', shouldNavigate(event))
+
+        }, 100);
     }
 }
 
-function transition(node)
+const transition = (node) => 
 {
+    // console.log('Use Transition for Node', node);
+
     function onClick(event)
     {
+        // console.log('Use Transition Click Triggered for Node', event.target);
+        
         transitionTriggerMethod(event);
+
+        event.preventDefault();
+        event.stopPropagation();
     }
 
     // Bind the event listener
@@ -45,12 +43,12 @@ function transition(node)
 
     // Unbind the event listener
     return {
-        destroy() {
+        destroy()
+        {
             node.removeEventListener("click", onClick);
         }
     };
 
 }
-
 
 export { transition, transitionTriggerMethod };

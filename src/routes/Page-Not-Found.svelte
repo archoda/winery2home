@@ -9,14 +9,12 @@
     /*
         Exports
     */
-    // Used By Svelte-Routing - prevents console log warning
-    export let location;
 
 </script>
 
 <svelte:head>
-    <title>{ Store.pages.pagenotfound.title } | { Store.pages.base.title }</title>
-	<meta name="description" property="description" content="{ Store.pages.pagenotfound.description }">
+    <title>{ $Store.Pages.PageNotFound.Title } | { $Store.Pages.Base.Title }</title>
+	<meta name="description" property="description" content="{ $Store.Pages.PageNotFound.DescriptionTitle }">
 </svelte:head>
 
 <main id="main" class="main main-page-nof-found">

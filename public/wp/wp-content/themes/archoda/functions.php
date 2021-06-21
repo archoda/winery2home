@@ -12,6 +12,7 @@ if ( ! defined( '_S_VERSION' ) ) {
 	define( '_S_VERSION', '1.0.0' );
 }
 
+
 if ( ! function_exists( 'archoda_setup' ) ) :
 	/**
 	 * Sets up theme defaults and registers support for various WordPress features.
@@ -21,8 +22,15 @@ if ( ! function_exists( 'archoda_setup' ) ) :
 	 * as indicating support for post thumbnails.
 	 */
 
+
+	// Set-up Report ALL Errors
+	ini_set('error_reporting', E_ALL);
+
 	// Load Archoda Classes
 	require_once(get_template_directory() . '/static/classes/class-archoda.php');
+	require_once(get_template_directory() . '/static/classes/class-archoda-email-handler.php');
+	require_once(get_template_directory() . '/static/classes/class-archoda-gravity-forms.php');
+	require_once(get_template_directory() . '/static/classes/class-archoda-snipcart.php');
 	
 	
 	function archoda_setup() {
@@ -30,18 +38,47 @@ if ( ! function_exists( 'archoda_setup' ) ) :
 		try
 		{
 			global $Archoda;
+			global $ArchodaEmail;
+			global $ArchodaGravityForms;
+			global $ArchodaSnipcart;
 	
-			$Archoda = new Archoda();
+			$Archoda 					= new Archoda();
+			$ArchodaEmail 				= new ArchodaEmail((array('To' => 'jmallory@archodaDigital.com')));
+			$ArchodaGravityForms 		= new ArchodaGravityForms();
+			$ArchodaSnipcart 			= new ArchodaSnipcart(array('Email' => $ArchodaEmail));
 
-			// HANDLE USER REQUESTS
+			/*
+				-------------------------------------------------------
+				HANDLE USER REQUESTS
+				-------------------------------------------------------
+			*/
 			if (!is_admin())
 			{
-				$Archoda->WP_Setup_Remove_Actions();
-				$Archoda->WP_Setup_Remove_Actions_Embeds();
-				$Archoda->WP_Setup_Remove_Actions_Emojis();
+				// $Archoda->WP_Setup_Remove_Actions();
+				// $Archoda->WP_Setup_Remove_Actions_Embeds();
+				// $Archoda->WP_Setup_Remove_Actions_Emojis();
+				
+				/* 
+					API
+				*/
+				$Archoda->WP_API_Wineries_All_Init();
+				$Archoda->WP_API_Wineries_Featured_Init();
+				$Archoda->WP_API_Wineries_Filtered_Init();
+				
+				/* 
+					API: SNIPCART
+				*/
+
+				$ArchodaSnipcart->WP_API_WebHooks_Validation_Init();
+				$ArchodaSnipcart->WP_API_Webhooks_Validation_Shipping_Init();
+				$ArchodaSnipcart->WP_API_Webhooks_Validation_Product_Init();
 			}
 
-			// HANDLE ADMIN REUQESTS
+			/*
+				-------------------------------------------------------
+				HANDLE ADMIN REUQESTS
+				-------------------------------------------------------
+			*/
 			if (is_admin())
 			{
 
@@ -78,8 +115,58 @@ if ( ! function_exists( 'archoda_setup' ) ) :
 					//$Archoda->WP_Setup_Admin_Role_Winery_Remove_Menu_Items();
 					//wp_redirect('/wp/wp-admin/edit.php?post_type=wineries');
 				}
-				
 			}
+
+			/*
+				-------------------------------------------------------
+				HANDLE FOR ALL REUQESTS
+				-------------------------------------------------------
+			*/
+
+			/*
+				WP ADMIN IMAGE RESIZE OPTIONS
+				---
+				Note: Set width @'9999' and crop @false to constrain resize to fixed height
+			*/
+
+			remove_image_size( 'thumbnail' );
+			remove_image_size( 'medium' );
+			remove_image_size( 'medium_large' );
+			remove_image_size( 'large' );
+			remove_image_size( 'full_size' );
+
+			add_image_size('Winery Product Image Thumbnail', 150, false);
+			add_image_size('Winery Product Image Desktop', 9999, 720, false);
+			add_image_size('Winery Product Image Tablet', 9999, 600, false);
+			add_image_size('Winery Product Image Mobile', 9999, 392, false);
+			
+			add_image_size('Winery About Image Thumbnail', 150, false);
+			add_image_size('Winery About Image Desktop', 9999, 522, false);
+			add_image_size('Winery About Image Tablet', 9999, 422, false);
+			add_image_size('Winery About Image Mobile', 9999, 300, false);
+
+			/*
+				GRAVITY FORMS
+			*/
+
+			// Encrypt DB Entry Data Before saving
+			add_filter( 'gform_save_field_value', function($value, $entry, $field, $form)
+			{
+				global $ArchodaGravityForms;
+				return $ArchodaGravityForms->EncryptHook($value, $entry, $field, $form);
+
+			}, 10, 5 );
+			
+			// Decrypt DB Entry Data Before displaying to the user
+			add_filter( 'gform_get_input_value', function($value, $entry, $field, $form)
+			{
+				//if (is_admin() && rgget('view') == 'entry')
+				//{
+					global $ArchodaGravityForms;
+					return $ArchodaGravityForms->DecryptHook($value, $entry, $field, $form);
+				//}
+
+			}, 10, 5 );
 
 		}
 		catch (Expression $e)
@@ -167,9 +254,9 @@ function archoda_scripts() {
 
 
 	// Remove WP Comments
-	// if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
-	// 	wp_enqueue_script( 'comment-reply' );
-	// }
+	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
+		wp_enqueue_script( 'comment-reply' );
+	}
 }
 add_action( 'wp_enqueue_scripts', 'archoda_scripts' );
 

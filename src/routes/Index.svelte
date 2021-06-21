@@ -1,4 +1,3 @@
-
 <script>
     /* LOOK INTO THIS FOR ROUTING
     https://routify.dev/
@@ -9,9 +8,10 @@
         Imports
     */
 
-    import { onMount } from 'svelte';
+    import { onMount, getContext, setContext, beforeUpdate, afterUpdate } from 'svelte';
     import { Router, Route } from 'svelte-routing';
     import { Store } from '../lib/js/store.js';
+    import StoreManagerClass from '../lib/js/StoreManagerClass.js';
     import anime from 'animejs';
     import { transition } from '../lib/js/transition.js';
 
@@ -24,8 +24,6 @@
     import Shop from './Shop.svelte';
     import HowItWorks from './How-It-Works.svelte';
     import AboutUs from './About-Us.svelte';
-    import AccountLogin from './Account-Login.svelte';
-    import ShoppingCart from './Shopping-Cart.svelte';
     import ContactUs from './Contact-Us.svelte';
     import PrivacyPolicy from './Privacy-Policy.svelte';
     import TermsOfService from './Terms-Of-Service.svelte';
@@ -35,30 +33,333 @@
     /*
       Import Components
     */
+
     import Loader from '../components/Loader.svelte';
+    import ModalComponent from '../components/ModalComponent.svelte';
     import ButtonMenu from '../components/Button-Menu.svelte';
-    import ButtonClose from '../components/Button-Close.svelte';
+    import ButtonComponent from '../components/ButtonComponent.svelte';
+    import ButtonCloseComponent from '../components/ButtonCloseComponent.svelte';
 
 
     /*
         Exports
     */
-    // Used By Svelte-Routing
-    export let url = '';
+    export let url = ''; // Used By Svelte-Routing DO NOT DELETE
+
+    /*
+        Store Init 
+    */
+
+    let StoreManager = new StoreManagerClass();
+
+    // Set the session host;
+    let SessionHost = window.location.protocol + '//' + window.location.hostname + ((window.location.port) ? ':' + window.location.port : ''); 
+    console.log(SessionHost = 'https://07cbeb1f6efc.ngrok.io');
+    
+    // Set the session mode;
+    let SessionMode = 'Browser';
+    let mqStandAlone = '(display-mode: standalone)';
+
+    if (navigator.standalone || window.matchMedia(mqStandAlone).matches) {
+        SessionMode = 'Standalone';
+    }
+
+    // Set the session mode on body for css;
+    document.querySelector('body').classList.add('session-mode-' + SessionMode.toLowerCase());
+
+    $Store = {
+        API: {
+            //Root: 'https://fb949a2fb43c.ngrok.io', //SessionHost,
+            Root: SessionHost,
+            Mode: SessionMode,
+            Cache: [],
+            Wineries: { 
+                List: [],
+                All: [], // Filled during session runtime(s)
+                Featured: [], // Filled during session runtime(s)
+                Filtered: [],
+                Maps: 
+                [ 
+                    /* Source: https://discovercaliforniawines.com/wine-map-winery-directory/ */
+                    { 
+                        Name: 'California',
+                        Active: false,
+                        Regions: [
+                            { Key: 'CA-NC', Value: 'California, North Coast', Wineries: [] },
+                            { Key: 'CA-CC', Value: 'California, Central Coast', Wineries: [] },
+                            { Key: 'CA-SF', Value: 'California, Sierra Foothills', Wineries: [] },
+                            { Key: 'CA-IV', Value: 'California, Inland Valleys', Wineries: [] },
+                            { Key: 'CA-SN', Value: 'California, Southern', Wineries: [] },
+                            { Key: 'CA-FN', Value: 'California, Far North', Wineries: [] },
+                        ],
+                    },
+                    { 
+                        Name: 'Washington',
+                        Active: false,
+                        Regions: [
+                            { Key: 'WA-NC-Lake', Value: 'Washington, Lake', Wineries: [] },
+                        ],
+                    },
+                    { 
+                        Name: 'Oregon',
+                        Active: false,
+                        Regions: [
+                            { Key: 'OR-NC-Lake', Value: 'Oregon, Lake', Wineries: [] },
+                        ]
+                    }
+                ]
+            }
+        },
+        Modal: {
+            Class: '',
+            Type: '',
+            Active: false,
+            Toggle: false,
+            Data: {},
+            Container: {
+                Class: ''
+            },
+            Callback: {
+                Init: () => { console.log('Modal Init Callback Called'); },
+                Toggle: () => {},
+                Close: () => {},
+            }
+        },
+        Pages: {
+            Active: 'Home',
+            Base: {
+                Title: 'Winery2Home.com',
+            },
+            PageNotFound: {
+                Name: 'Page Not Found',
+                Slug: 'page-not-found',
+                Path: '/page-not-found',
+                Title: 'Page Not Found',
+                Description: 'We\'re sorry. The page you were looking for was not found.',
+            },
+            Home: {
+                Name: 'Home',
+                Slug: 'home',
+                Path: '/',
+                Title: 'Welcome!',
+                Description: 'Home',
+                Tab1:
+                {
+                    Header:
+                    {
+                        Small: 'Explore The',
+                        Large: 'Wineries',
+                    },
+                    Body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et.'
+                },
+                Tab2:
+                {
+                    Header: 
+                    {
+                        Small: 'Discover Select',
+                        Large: 'Wines',
+                    },
+                    Body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et.'
+                },
+                Tab3: 
+                {
+                    Header: 
+                    {
+                        Small: 'Register For Special',
+                        Large: 'Offers',
+                    },
+                    Body: '',
+                    Form: 
+                    {
+                        Label: 'Register Now',
+                        Success: '<p>Thank you for registering. Keep and eye out for great Winery2Home offers coming to your inbox soon!</p>',
+                        Error: 'We\'re sorry. Your registration could not be processed at this time - please try again soon.',
+                    }
+                },
+                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/featured/0/true'] }, { Url: [SessionHost + '/wp/wp-json/wineries-list/false/']}], // Gets Featured Wines
+            },
+            Shop: {
+                Name: 'Shop',
+                Slug: 'shop',
+                Path: '/shop',
+                Title: 'Shop',
+                Description: 'Shop',
+                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/false/true'] }], // Gets All Wines
+                LoaderSearch: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/filtered/false/false/false'] }] // Gets Filtered Wines
+            },
+            HowItWorks: {
+                Name: 'How It Works',
+                Slug: 'how-it-works',
+                Path: '/how-it-works',
+                Title: 'How It Works',
+                Description: 'How It Works',
+                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/featured/1/false'] }],
+            },
+            AboutUs: {
+                Name: 'About Us',
+                Slug: 'about-us',
+                Path: '/about-us',
+                Title: 'About Us',
+                Description: 'About Us',
+                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/featured/1/false'] }],
+            },
+            ContactUs: {
+                Name: 'Conctact Us',
+                Slug: 'contact-us',
+                Path: '/contact-us',
+                Title: 'Contact Us Us',
+                Description: 'Contact Us',
+                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/featured/1/false'] }],
+            },
+            AgeCheck: {
+                Name: 'Age Check',
+                Slug: 'age-check',
+                Path: '/age-check',
+                Title: 'Age Check',
+                Description: 'To visit our website you must be old enough to purchase and consume alcohol under the laws of your country of residence.',
+                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/featured/1/false'] }],
+            },
+            AgeCheckDenied: {
+                Name: 'Age Check Denied',
+                Slug: 'age-check-denied',
+                Path: '/age-check-denied',
+                Title: 'Age Check Denied',
+                Description: 'Your access has been denied due to not being of legal drinking age within your home country.',
+                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/featured/1/false'] }],
+            },
+            PrivacyPolicy: {
+                Name: 'Privacy Policy',
+                Slug: 'privacy-policy',
+                Path: '/privacy-policy',
+                Title: 'Privacy Policy',
+                Description: 'Privacy Policy',
+                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/featured/1/false'] }],
+            },
+            TermsOfService: {
+                Name: 'Terms of Service',
+                Slug: 'terms-of-service',
+                Path: '/terms-of-service',
+                Title: 'Terms of Service',
+                Description: 'Terms of Service',
+                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/featured/1/false'] }],
+            }
+        },
+        animations: {
+            page: {
+                transition: {
+                    speed: 1000
+                }
+            }
+        },
+    };
+    
+    // Listen for Snipcart ready event
+    document.addEventListener('snipcart.ready', () =>
+    {
+        let SnipcartDelay = setTimeout(() =>
+        {
+            SnipcartInit();
+            clearTimeout(SnipcartDelay);
+
+        }, 1000);
+        
+    });
+
+    const SnipcartCheckoutCallback = (event) =>
+    {
+        // Toggle the snipcart view
+        if (document.querySelector('.snipcart-cart--opened'))
+        {
+            Snipcart.api.theme.cart.close()
+        } 
+        else
+        {
+            Snipcart.api.theme.cart.open();
+            SnipcartCheckoutWindowDetect();
+        }
+    }
+
+    const SnipcartCheckoutWindowDetect = () =>
+    {
+        let SnipcartContainer = document.querySelector('.snipcart-modal__container');
+        let SnipcartTimeout = null;
+        
+        if (!SnipcartContainer)
+        {
+            
+            SnipcartTimeout = setInterval( () => {
+                
+                SnipcartCheckoutWindowDetect();
+                clearTimeout(SnipcartTimeout);
+
+            }, 10);
+        }
+        else
+        {
+            console.log(SnipcartContainer);
+            SnipcartContainer.style.zIndex = 100000;
+        }
+    }
+
+    const SnipcartInit = () =>
+    {
+
+        /* 
+            Snipcart Events:
+            https://docs.snipcart.com/v3/sdk/events
+        */
+
+        Snipcart.events.on('cart.created', async (cartItem) =>
+        {   
+            // On Mobile - change the header span
+            document.querySelector('.snipcart-cart-header .snipcart-modal__header-summary-title span').innerHTML = 'Oder Details';
+        });
+
+        Snipcart.events.on('item.updated', async (cartItem) =>
+        {
+            console.log('Snipcart Event => Item Updated');
+        });
+
+        Snipcart.events.on('item.added', async (cartItem) =>
+        {
+            console.log('Snipcart Event => Item Added');
+        });
+
+        Snipcart.events.on('item.removed', async (cartItem) =>
+        {
+            console.log('Snipcart Event => Item Removed');
+        });
+
+        // Snipcart.events.on('cart.reset', (cartState) => 
+        // {
+        //     console.log('Snipcart Event => Cart Reset');
+        //     await ();
+        // });
+
+        // Snipcart.events.on('shipping.selected', (shippingMethod) => {
+        //     console.log('Snipcart Event => Shipping Selected');
+        //     console.log(shippingMethod);
+        // });
+    }
 
     /*
          Loader Component Controls
     */
-    let LoaderCircleInstance;
 
-    function LoaderCompleteCallback(event)
-    {
-        Store.api.wineries = event.detail.data;
+    let LoaderActive = false;
+    let LoaderType = null;
+    let LoaderClassColor = null;
+    let LoaderOptions = null;
+    let LoaderCompleteCallback = (data) => {};
 
-        let loader = document.getElementById('loader');
+    // setInterval(() => { console.log(LoaderActive); }, 1000);
+    const LoaderComplete = (event) =>
+    {   
+        // Pass the results to the caller
+        LoaderCompleteCallback(event.detail.data);
 
         // Show the page elements
-        if (!document.getElementById('main').classList.value.indexOf('age-check') > -1)
+        if (!document.querySelector('main').classList.value.indexOf('age-check') > -1)
         {
             anime({
                 targets: 'header, .page, footer',
@@ -67,40 +368,72 @@
                 direction: 'forward',
                 easing: 'linear',
                 loop: false,
-                begin: () =>
+                complete: () =>
                 {
-                    loader.classList.add('hidden');
-                    loader.style.marginTop = -1000000000 + 'vw';
-                },
+                    LoaderActive = false;
+                }
             });
         }
-        //LoaderCircleInstance.LoaderCircleReInit();
     }
 
-     /*
+    const LoaderInitCallback = (_Args) =>
+    {
+        
+        if (_Args.LoaderActive && _Args.LoaderOptions)
+        {
+            LoaderActive = _Args.LoaderActive;
+            LoaderOptions = _Args.LoaderOptions;
+
+            if (_Args.LoaderType) LoaderType = _Args.LoaderType;
+            if (_Args.LoaderClassColor) LoaderClassColor = _Args.LoaderClassColor;
+            if (_Args.LoaderCompleteCallback) LoaderCompleteCallback = _Args.LoaderCompleteCallback;
+        }
+    }
+
+    /*
+         Modal Component Controls
+    */
+    
+    $: ModalClass = '';
+    $: ModalType = '';
+    $: ModalActive = false;
+
+    /*
          ButtonMenu Component Controls
     */
 
-    export let ButtonMenuInstance;
-
-    function ButtonMenuInstanceClickCallback(event)
+    const ButtonMenuInstanceClickCallback = (event) =>
     {  
-        let nav = document.getElementById('nav');
+        NavMainToggle();
+    }
 
-        if (nav.classList.value.indexOf('hidden') > -1)
+    /*
+        NavMain Controls
+    */
+   
+    let NavMainActive = false;
+
+    const NavMainToggle = (duration = 250) =>
+    {
+        
+        let NavMain = document.getElementById('nav');
+
+        NavMainActive = !NavMainActive;
+
+        if (NavMainActive)
         {
-             anime({
-                targets: nav,
+            anime({
+                targets: NavMain,
                 opacity: {
                     value: [0, 1],
-                    duration: 250,
+                    duration: duration,
                     direction: 'forward',
                     easing: 'linear',
                 },
                 begin: () =>
                 {
                     nav.classList.remove('hidden');
-                    nav.style.marginTop = 0;
+                    nav.style.marginLeft = 0;
                 },
                 loop: false,
             });
@@ -108,78 +441,145 @@
         else
         {
             anime({
-                targets: nav,
+                targets: NavMain,
                 opacity: {
                     value: [1, 0],
-                    duration: 250,
+                    duration: duration,
                     direction: 'forward',
                     easing: 'linear',
+                    delay: 500,
                 },
                 complete: () =>
                 {
                     nav.classList.add('hidden');
-                    nav.style.marginTop = -1000000000 + 'vw';
+                    nav.style.marginLeft = -1000000000 + 'vw';
                 },
                 loop: false,
             });
         }
     }
 
-    /*
-         ButtonClose Component Controls
-    */
-
-    let ButtonCloseInstance;
-
-    function ButtonCloseInstanceClickCallback(event)
+    const NavMainLinkClick = (Event) => 
     {
-        console.log('close button called')
+
+        NavMainToggle();
     }
 
-    onMount(() =>
+    onMount(async () =>
     {
-        
+        return () => {
+            console.log('Home Page UnMount....');
+        }
     });
+
+    beforeUpdate(() =>
+    {
+    //     // Do something...
+    //     console.log('BeforeUpdate Index.Svelte Called.....');
+    });
+
+    afterUpdate(() =>
+    {
+    //     // Do something...
+    //     console.log('AfterUpdate Index.Svelte Called.....');
+    });
+
+
 </script>
 
-<!--<div id="os" class="os">
+
+<svelte:head>
+
+    <!-- SNIPCART -->
+    <link rel="stylesheet" href="https://cdn.snipcart.com/themes/v3.2.0/default/snipcart.css" />
+    <script async src="https://cdn.snipcart.com/themes/v3.2.0/default/snipcart.js"></script>
+    <style>
+
+        :root {
+            .snipcart-button-primary
+            {
+                background-color: var(--bgColor-buttonPrimary,#1a4db3);
+            }
+        }
+    </style>
+    <!-- HOTJAR -->
+	<!-- <script>
+		(function(h,o,t,j,a,r){
+			h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+			h._hjSettings={hjid:1769770,hjsv:6};
+			a=o.getElementsByTagName('head')[0];
+			r=o.createElement('script');r.async=1;
+			r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+			a.appendChild(r);
+		})(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+	</script> -->
+
+	<!-- GOOGLE: Global site tag (gtag.js) - Google Analytics -->
+	<!-- <script async src="https://www.googletagmanager.com/gtag/js?id=UA-163724990-1"></script>
+	<script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-163724990-1');
+	</script> -->
+
+    <!-- FLICKITY -->
+    <script type="text/javascript" src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <link rel="preload stylesheet" as="style" type="text/css" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+
+</svelte:head>
+
+<!-- OnionSkin -->
+<!-- <div id="os" class="os">
     <picture>
-        <source srcset="./lib/images/_onionskin-home-desktop.jpg" media="(min-width: 768px)" />
-        <source srcset="./lib/images/_onionskin-home-mobile.jpg" />
+        <source srcset="./lib/images/_onionskin-home-desktop.png" media="(min-width: 768px)" />
+        <source srcset="./lib/images/_onionskin-home-mobile.png" />
         <img src="./lib/images/_onionskin-home-mobile.jpg" alt="onionskin"/>
     </picture>
-</div>-->
+</div> -->
 
-<ButtonMenu bind:this="{ButtonMenuInstance}" classColor={"#900A4A"} on:click={ButtonMenuInstanceClickCallback} />
-<ButtonClose bind:this="{ButtonCloseInstance}" classColor={"white"} on:click={ButtonCloseInstanceClickCallback} />
-<Loader bind:this="{LoaderCircleInstance}" type={"circle"} classColor={"#FFFFFF"} FetchOptions={[Store.env.apiRoot + '/wp/wp-json/wineries/products?cache=no']} on:message={LoaderCompleteCallback} />
+<ModalComponent />
 
-<!-- Accessible Skip Main Link -->
-<!-- http://web-accessibility.carnegiemuseums.org/code/skip-link/#:~:text=A%20skip%20(navigation)%20link%20provides,often%20be%20many%20navigation%20links.&text=A%20skip%20link%20is%20a,immediate%20access%20to%20pertinent%20content. -->
+{#if LoaderActive }
+<!-- NAVIGATION: Loader/Transition -->
+<Loader LoaderType={LoaderType} LoaderClassColor={LoaderClassColor} LoaderOptions={LoaderOptions} on:message={LoaderComplete} />
+{/if}
+
+<!-- NAVIGATION: Button Toggle -->
+<ButtonMenu classColor={"#900A4A"} on:click={ButtonMenuInstanceClickCallback} />
+<ButtonComponent AttributeId={''} AttributeClass={'snipcart-checkout'} AttributeTitle={'snipcart-checkout'} Callback={SnipcartCheckoutCallback}>Checkout Open <span class="snipcart-items-count"></span></ButtonComponent>
+
+
+
+<!-- NAVIGATION: Accessible Skip -->
 <a id='nav-skip' class='sronly' href='#main'>
     Skip Navigation or Skip to Content
 </a>
 
+
+<!-- NAVIGATION -->
 <nav id="nav" class="nav nav-main hidden" aria-label="main-menu" aria-expanded="false" aria-controls="menu-list" aria-haspopup="false">
+    <ButtonCloseComponent  AttributeId={'nav-button-close'} AttributeClass={'nav-close'} AttributeTitle={'Nav Close'} Callback={ () => { NavMainToggle(); } } />
     <ul role="menu">
-        <li role="menuitem"><a href="/" tabindex="-1" title="Home" use:transition>Home</a></li>
-        <li role="menuitem"><a href="/shop" tabindex="-1" title="Shop" use:transition>Shop</a></li>
-        <li role="menuitem"><a href="/join" tabindex="-1" title="Join">Join</a></li>
-        <li role="menuitem"><a href="/how-it-works" tabindex="-1" title="How It Works" use:transition>How It Works</a></li>
-        <li role="menuitem"><a href="/about-us" tabindex="-1" title="About Us" use:transition>About Us</a></li>
+        <li role="menuitem"><a href="/" tabindex="-1" title="Home" on:click={NavMainLinkClick} use:transition>Home</a></li>
+        <li role="menuitem"><a href="/shop" tabindex="-1" title="Shop" on:click={NavMainLinkClick} use:transition>Shop</a></li>
+        <li role="menuitem"><a href="/how-it-works" tabindex="-1" title="How It Works" on:click={NavMainLinkClick} use:transition>How It Works</a></li>
+        <li role="menuitem"><a href="/about-us" tabindex="-1" title="About Us" on:click={NavMainLinkClick} use:transition>About Us</a></li>
     </ul>
     <ul role="menu">
-        <li role="menuitem"><a href="/shopping-cart" tabindex="-1" title="Shopping Cart" use:transition>Shopping Cart</a></li>
-        <li role="menuitem"><a href="/account-login" tabindex="-1" title="Account Login" use:transition>Account Login</a></li>
-        <li role="menuitem"><a href="/contact-us" tabindex="-1" title="Contact Us" use:transition>Contact Us</a></li>
-        <li role="menuitem"><a href="/privacy-policy" tabindex="-1" title="Privacy Policy" use:transition>Privacy Policy</a></li>
-        <li role="menuitem"><a href="/terms-of-service" tabindex="-1" title="Terms of Service" use:transition>Terms of Service</a></li>
-        <li role="menuitem"><a href="/bad-path" tabindex="-1" title="Bad Path" use:transition>Bad Path</a></li>
+        <li role="menuitem"><a href="#" tabindex="-1" title="Shopping Cart" class="checkout" on:click={ (Event) => { NavMainToggle(); SnipcartCheckoutCallback(); Event.preventDefault(); Event.stopPropagation(); return false; } }>Shopping Cart</a></li>
+        <!-- <li role="menuitem"><a href="/account-login" tabindex="-1" title="Account Login" on:click={NavMainLinkClick}>Account Login</a></li> -->
+        <li role="menuitem"><a href="/contact-us" tabindex="-1" title="Contact Us" on:click={NavMainLinkClick} use:transition>Contact Us</a></li>
+        <li role="menuitem"><a href="/privacy-policy" tabindex="-1" title="Privacy Policy" on:click={NavMainLinkClick} use:transition>Privacy Policy</a></li>
+        <li role="menuitem"><a href="/terms-of-service" tabindex="-1" title="Terms of Service" on:click={NavMainLinkClick} use:transition>Terms of Service</a></li>
+        <!-- <li role="menuitem"><a href="/bad-path" tabindex="-1" title="Bad Path" on:click={test}>Bad Path</a></li> -->
     </ul>
 </nav>
 
+
+<!-- HEADER -->
 <header id="header" class="header hidden">
- 
     <a href="/" class="logo" title="home" use:transition>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 264 197.198">
             <g id="W2HLogo" transform="translate(-66.746 -35.695)">
@@ -197,29 +597,22 @@
     </a>
 </header>
 
-<div id="page" class="page hidden">
-    <div id="page-curtain" class="page-curtain">
+<!-- MAIN  -->
+<Router url="{url}">
+    <Route path={$Store.Pages.Home.Path} component={Home} LoaderInitCallback={LoaderInitCallback} />
+    <Route path={$Store.Pages.Shop.Path} component={Shop} LoaderInitCallback={LoaderInitCallback} />
+    <Route path={$Store.Pages.Shop.Path + '/*'} component={Shop} LoaderInitCallback={LoaderInitCallback} />
+    <Route path={$Store.Pages.HowItWorks.Path} component={HowItWorks} LoaderInitCallback={LoaderInitCallback} />
+    <Route path={$Store.Pages.AboutUs.Path} component={AboutUs} LoaderInitCallback={LoaderInitCallback} />
+    <Route path={$Store.Pages.ContactUs.Path} component={ContactUs} LoaderInitCallback={LoaderInitCallback} />
+    <Route path={$Store.Pages.PrivacyPolicy.Path} component={PrivacyPolicy} LoaderInitCallback={LoaderInitCallback} />
+    <Route path={$Store.Pages.TermsOfService.Path} component={TermsOfService} LoaderInitCallback={LoaderInitCallback} />
+    <Route path={$Store.Pages.AgeCheck.Path} component={AgeCheck} LoaderInitCallback={LoaderInitCallback} />
+    <Route path={$Store.Pages.AgeCheckDenied.Path} component={AgeCheckDenied} LoaderInitCallback={LoaderInitCallback} />
+    <Route component={PageNotFound} />
+</Router>
 
-        <Router url="{url}">
-            <Route path="/" component={Home} />
-            <Route path="/shop" component={Shop} />
-            <Route path="/how-it-works" component={HowItWorks} />
-            <Route path="/about-us" component={AboutUs} />
-            <Route path="/account-login" component={AccountLogin} />
-            <Route path="/shopping-cart" component={ShoppingCart} />
-            <Route path="/contact-us" component={ContactUs} />
-            <Route path="/privacy-policy" component={PrivacyPolicy} />
-            <Route path="/terms-of-service" component={TermsOfService} />
-            <Route path="/age-check" component={AgeCheck} />
-            <Route path="/age-check-denied" component={AgeCheckDenied} />
-            <Route component={PageNotFound} />
-        </Router>
-
-        <!-- End Curtain Wrap -->
-    </div>
-<!-- End Page Wrap -->
-</div>
-
+<!-- FOOTER -->
 <footer id="footer" class="footer hidden">
     <p>
         <a href="/privacy-policy" title="Do Not Sell My Personal Information" use:transition><strong>Do Not Sell My Personal Information</strong></a>
@@ -227,10 +620,28 @@
     </p>
 </footer>
 
-<style global lang="scss">
+<!-- SNIPCART -->
+<!-- data-cart-custom1-name="Confirm you're of legal age to purchace alcohol?"
+    data-cart-custom1-options="true|false"
+    data-cart-custom1-required="true" -->
+<div class="snipcart-wrapper-checkout">
+    <div id="snipcart" data-config-modal-style="full" data-api-key="OTdhZmI1OGEtNmE1Ny00NWEwLTgwNDUtZDlkZjdmYzUyMWUwNjM3NTA0ODYxMTExODQ3MDE4" hidden >
+        <payment section="top">
+            <fieldset class="snipcart-form__set">
+                <div class="snipcart-form__field">
+                    <div class="snipcart-form__field-checkbox">
+                        <snipcart-checkbox name="ageConsentConfirm" required></snipcart-checkbox>
+                        <snipcart-label for="ageConsentConfirm" class="snipcart__font--tiny snipcart-form__label--checkbox">
+                            I confirm, I am of legal drinking age.
+                        </snipcart-label>
+                    </div>
+                </div>
+            </fieldset>
+        </payment>
+    </div>
+</div>
 
-    .os { z-index: 100000; position: absolute; top: 0; left: 0; opacity: .4; margin:0;border:0;padding:0;box-sizing: border-box; }
-    .os img { width:100%; height: auto; }
+<style global lang="scss">
 
     /*
         GLOBAL VARS
@@ -251,31 +662,138 @@
         --primary-gray: rgba( 173, 171, 163, 1 ); /* #ADABA3; */
 
         --primary-tan: rgba( 245, 242, 231, 1 ); /* #F5F2E7; */
-        --primary-tan-dark: rgba( 245, 242, 231, 1 ); /* #F5F2E7; */
+        --primary-tan-medium: rgba( 237, 234, 223, 1 ); /* #EDEADF; */
+        --primary-tan-dark: rgba( 198, 193, 178, 1 ); /* #C6C1B2; */
+
+        --primary-wine-light: rgba( 190, 98, 144, 1 ); /* #BE6290 */
         --primary-wine: rgba( 144, 10, 74 , 1 ); /* #900A4A */
         --primary-wine-dark: rgba( 72 , 5, 37, 1 ); /* #480525 */
+
+
+        /* https://docs.snipcart.com/v3/setup/theming */
+
+        /* 
+            SNIPCART MODAL
+        */
+
+        --bgColor-modal: var(--primary-tan);
+        --bgColor-modalVeil: var(--primary-tan);
+        .snipcart-cart-summary { background-color: var(--primary-tan); }
+
+        /* 
+            SNIPCART TEXT COLORS
+        */
+
+        // --color-default: var(--primary-tan-dark); 
+        --color-alt: var(--primary-tan-dark);
+        --color-icon: var(--primary-wine);
+
+        /* 
+            SNIPCART COLOR: LINKS
+        */
+        --color-link: var(--primary-wine);
+        --color-link-hover: var(--primary-wine-dark);
+        --color-link-active: var(--color-link);
+        --color-link-focus: var(--color-link);
+        
+        /* 
+            SNIPCART COLORS: SECONDARY
+        */
+
+        --color-buttonSecondary: var(--primary-wine);
+        --color-buttonSecondary-hover: var(--color-buttonSecondary);
+        --color-buttonSecondary-active: var(--color-buttonSecondary);
+        --color-buttonSecondary-focus: var(--color-buttonSecondary);
+
+        /* 
+            SNIPCART BUTTON COLORS: PRIMARY
+        */
+
+        --bgColor-buttonPrimary: var(--primary-wine);
+        
+        /* 
+            SNIPCART BUTTON COLORS: SECONDARY
+        */
+        --bgColor-info: var(--primary-tan-medium);
+        --bgColor-buttonSecondary: var(--bgColor-info);
+        --bgColor-buttonSecondary-hover: var(--bgColor-info);
+        --bgColor-buttonSecondary-active: var(--bgColor-info);
+        --bgColor-buttonSecondary-focus: var(--bgColor-info);
+        
+        
+        /* 
+            SNIPCART BORDER COLORS: INPUT
+        */
+        --borderColor-input-hover: var(--primary-wine);
+        --borderColor-input-focus: var(--borderColor-input-hover);
+        --borderColor-input-checked: var(--borderColor-input-hover);
+
+        /*
+            SNIPCART BADGE COLORS: BORDER
+        */
+
+        /* Default (completed) */
+        --color-badge: var(--primary-wine);
+        --borderColor-badge: var(--primary-white);
+        --bgColor-badge: var(--primary-white);
+
+        /* Active */
+        --color-badge-active: var(--primary-white);
+        --borderColor-badge-active: var(--primary-wine);
+        --bgColor-badge-active: var(--primary-wine);
+
+        /* Disabled */
+        --color-badge-disabled: var(--primary-tan-dark);
+        --borderColor-badge-disabled: var(--primary-tan-dark);
+        --bgColor-badge-disabled: var(--primary-tan);
+
+        /*
+            SNIPCART INPUT
+        */
+
+        --bgColor-input: var(--primary-white);
+        --bgColor-input-hover: var(--bgColor-input);
+        --bgColor-input-focus: var(--bgColor-input);
+        --bgColor-input-checked: var(--primary-wine);
+        --bgColor-input-autofill: var(--primary-white);
+        --color-input-checked: var(--primary-white);
 
     }
 
     /*
-    GLOBAL RESETS
+        GLOBAL RESETS
     */
 
-    * { box-sizing: border-box; }
+    *,
+    *::before,
+    *::after { box-sizing: border-box; }
 
-    html, body, .page, .page-curtain { width: 100%; height: 100%; margin: 0; border: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; border: 0; padding: 0; }
 
-    html { background-color: var(--primary-tan); }
+    html { font-family: 'Domine', 'Arial', 'Helvetica', sans-serif; color: var(--primary-black); background-color: var(--primary-tan); }
     
-    .hidden { opacity: 0; }
+    @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
+    {   
+        html { font-size: 3.5vw; }
+    }
 
+    @media (min-width: $mqMinWidthDesktop) and (max-width: $mqMaxWidthDesktop)
+    {   
+        html { font-size: .85vw; }
+    }
+
+    body { overflow: hidden; }
+
+    .hidden { opacity: 0; }
+    .hidden-collapsed { opacity: 0; display: none; }
+    .honeypot { display: none; position: fixed; top: -10000000; left: -1000000000; }
+    
     /*
         GLOBAL SCREEN READER TEXT
     */
 
     .sronly { position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden; }
     .sronly:focus { color: black; display: inline-block; height: auto; width: auto; position: static; margin: auto; }
-
 
     /*
         GLOBAL FONTS
@@ -301,8 +819,6 @@
         /*font-display: swap;*/
     }
 
-    * { font-family: 'Domine', 'Arial', 'Helvetica', sans-serif; color: var(--primary-black); }
-
     a, abbr, acronym, address, area, article, aside, b, blockquote, body, 
     button, caption, cite, code, col, colgroup, data, datalist, dd, del, 
     details, dfn, dialog, div, dl, dt, em, fieldset, figcaption, figure, footer,
@@ -311,76 +827,131 @@
     s, samp, section, select, small, span, strong, sub, summary, sup, textarea,
     track, u, ul, var, wbr { 
         font-variation-settings: 'wght' 400; 
-        line-height: 1.28; 
+        line-height: 1.45; 
     }
 
     *:not(p) { line-height: 1.10; }
 
-    h1,h2 { color: var(--primary-wine); }
+    h1,h2 { margin: 0; padding: 0; color: var(--primary-wine); }
 
     h1,h2,h3,
     h1 *,h2 *, h3 * { font-family: 'Domine', 'Arial', 'Helvetica', sans-serif; font-variation-settings: 'wght' 500; }
 
     h4,h5,h6 { font-variation-settings: 'wght' 400 !important; }
     
+    
     * *:last-of-type:is(p) { padding-bottom: 0; }
 
-    a, a:active, a:visited, a:focus { text-decoration: none; border: none; outline: none; outline-style: none; -moz-outline-style: none; }
+    a, a:active, a:visited, a:focus { color: var(--primary-black); text-decoration: none; border: none; outline: none; outline-style: none; -moz-outline-style: none; }
+
+    a.wine-text, a.wine-text:active, a.wine-text:visited, a.wine-text:focus { color: var(--primary-wine); }
+
+    a.white-text, a.white-text:active, a.white-text:visited, a.white-text:focus { color: var(--primary-white); }
 
     @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
     {   
-        * { font-size: 3.15vw; }
+        p,
+        ul,
+        *:not(div) + a,
+        *:not(div) + p,
+        *:not(div) + ul,
+        *:not(div) + li { margin: 2.5vw 0 0; }
 
-        h1 .small { font-size: 6vw; }
-        h1, h1 *:not(.small) { font-size: 14.5vw; }
-
-        h1 { margin: 0 0 5vw 0; }
+        h2,
+        h2 *:not(div) { font-size: 4vw; margin: 0; }
+        *:not(div) + h2 { margin: 8vw 0 0; }
+        // h2 + *:not(div) { margin-top: 2.5vw; }
     }
 
     @media (min-width: $mqMinWidthDesktop) and (max-width: $mqMaxWidthDesktop)
     {
-       
+
+        // *:not(strong) {  font-size: 1vw; margin: 0; }
+
+        // * + p { margin: 1.5vw 0 0; }
+
+        // h2 { font-size: 1.5vw; margin: 0; }
+        // * + h2 { margin: 2vw 0 0; }
+        // h2 + * { margin-top: 1.5vw; }
     }
 
     /*
-        GLOBAL PAGE & PAGE CURTAIN
+        GLOBAL SNIPCART
     */
-    #page { -webkit-overflow-scrolling: touch; /* Lets it scroll lazy */ }
+    
+    .snipcart-wrapper-checkout { position: absolute; z-index: 90; top: 0; right: 0; }
+    .snipcart-cart-header .snipcart-cart-header__icon:nth-child(1),
+    .snipcart-cart-header .snipcart-modal__close-icon,
+    .snipcart-cart-header .snipcart-cart-header__count { display: none; }
 
     @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
-    { 
-        /* #page { overflow: hidden scroll; clip-path: inset(30vw 0 10vw 0); } */
+    {
+        .snipcart-cart-header .snipcart-modal__header-summary-title { margin-right: 19vw; }
+        .snipcart-cart-header .snipcart-modal__header-summary-title span { content: "Order Summary"; }
     }
 
     /*
         GLOBAL HEADER
     */
 
-    header { position: absolute; left: 0; top: 0; }
+    header { z-index: 10; position: absolute; left: 0; top: 0; }
 
     header .logo,
-    header .logo svg { width: 100%; height: auto; }
+    header .logo svg { height: auto; }
 
     @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
     {
-        header .logo svg { min-width: 20vw; max-width: 20vw; margin: 8vw 0 0 5vw; }
+        header .logo svg { width: 18vw; margin: 4.5vw 0 0 5vw; }
     }
+
+    @media (min-width: $mqMinWidthDesktop) and (max-width: $mqMaxWidthDesktop)
+    {
+        header .logo svg { width: 8vw; margin: 2vw 0 0 3.25vw; }
+    }
+    
+
+    /*
+        GLOBAL FOOTER
+    */
+    
+    .footer { position: fixed; z-index: 3; width: 100%; text-align: center; }
+    
+
+    @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
+    {
+        .footer { bottom: -1vw; } 
+
+        .footer *:not(a),
+        .footer a, .footer a * { font-size: 2.5vw; }
+    }
+
+    @media (min-width: $mqMinWidthDesktop) and (max-width: $mqMaxWidthDesktop)
+    {
+        .footer { bottom: 0; } 
+
+        .footer *:not(a),
+        .footer a, .footer a * { font-size: .75vw; }
+    }
+
     /*
         GLOBAL NAV
     */
 
-    #nav { z-index: 1000; position: fixed; top: 0; left: 0; margin-top: -100000000vw; }
+    #nav { z-index: 2000; position: fixed; top: 0; left: 0; margin-left: -100000000vw; display: flex; width: 100%; height: 100%; background-color: var(--primary-tan); align-items: center; justify-content: center; flex-flow: column; }
+
+    #nav ul,
+    #nav ul li { width: 100%; margin: 0; border: 0; padding: 0; text-align: center; list-style: none; }
+
+    .nav-close { position: absolute; top: 4vw; right: 4vw; }
+
+    #nav ul:first-of-type li * { font-variation-settings: 'wght' 500; color: var(--primary-wine); }
 
     @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
     {
-        #nav { display: flex; width: 100%; height: 100%; background-color: var(--primary-tan); align-items: center; justify-content: center; flex-flow: column; }
-
-        #nav ul,
-        #nav ul li { width: 100%; margin: 0; border: 0; padding: 0; text-align: center; list-style: none; }
 
         #nav ul:first-of-type li + li { margin-top: 4vw; }
 
-        #nav ul:first-of-type li * { font-size: 8vw; font-variation-settings: 'wght' 500; color: var(--primary-wine); }
+        #nav ul:first-of-type li * { font-size: 8vw; }
 
         #nav ul:last-of-type { margin-top: 8vw; }
 
@@ -388,41 +959,118 @@
 
         #nav ul:last-of-type li * { font-size: 5.15vw; color: var(--primary-black); }
 
-        #nav ul:last-of-type li:nth-of-type(3),
-        #nav ul:last-of-type li:last-of-type { margin-top: 5.15vw; }
-    }
+        // #nav ul:last-of-type li:nth-of-type(3),
+        // #nav ul:last-of-type li:last-of-type { margin-top: 8vw; }
 
-    /*
-        GLOBAL FOOTER
-    */
-    
-    footer { position: fixed; width: 100%; text-align: center; }
-    footer *:not(a) { font-size: 2vw; }
-    footer a, footer a * { font-size: 2.5vw; }
-
-    @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
-    {
-        footer { bottom: 1vw; } 
     }
 
     @media (min-width: $mqMinWidthDesktop) and (max-width: $mqMaxWidthDesktop)
-    {
-       
+    {   
+
+        #nav { display: grid; grid-template-columns: 1fr 1fr; }
+
+        .nav-close { top: 1.5vw; right: 2vw; width: 4vw; grid-column: 1/span 2; }
+
+        #nav ul:first-of-type { padding-left: 26vw; }
+        #nav ul:last-of-type { padding-right: 26vw; }
+
+        #nav ul:first-of-type li + li { margin-top: 1vw; }
+
+        #nav ul:first-of-type li * { font-size: 3vw; }
+
+        #nav ul:last-of-type li * { font-size: 1vw; color: var(--primary-black);  margin: .25vw 0; display: inline-block; }
+
+        // #nav ul:last-of-type li:nth-of-type(3),
+        // #nav ul:last-of-type li:last-of-type { margin-top: 1.5vw; }
+
     }
 
+    /*
+        GLOBAL FORMS
+    */
+
+    .form input,
+    .form textarea {
+        -webkit-appearance: none;
+    }
+
+    .form input,
+    .form textarea { font-family: "Montserrat-Light", "Arial", "Helvetica", sans-serif; width: 100%; background-color: var(--primary-tan); border: 2px solid var(--primary-tan-dark); }
+
+    .form input:focus,
+    .form textarea:focus { outline: none; border: 2px solid var(--primary-wine); }
+    
+    @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
+    {   
+        // .form { margin: 0 19vw; }
+
+        .form input,
+        .form textarea { font-size: 4vw; text-align: center; padding: 1.25vw 2vw;  }
+
+        .form * + input,
+        .form * + textarea { margin-top: 2vw; }
+
+        .form button { margin-top: 2vw; }
+    }
+
+
+    @media (min-width: $mqMinWidthDesktop) and (max-width: $mqMaxWidthDesktop)
+    {   
+        // .form { margin: -2vw 22vw 0; }
+
+        .form input { font-size: 1.25vw; padding: .5vw .5vw; width: 14vw; }
+
+        .form input + input { margin-top: 2vw; }
+
+        .form button { margin-top: 1vw; }
+    }
 
     /*
         GLOBAL MAIN
     */
 
-    #main { position:relative; display: flex; align-items: center; justify-content: start; flex-flow: column; }
+    #main { position:relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: start; flex-flow: column; transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
 
-    #main .button { border: none; font-family: 'Montserrat-Light', 'Arial', 'Helvetica', sans-serif; color: var(--primary-black); text-align: center; text-transform: uppercase; }
+    button,
+    .button { cursor: pointer; border: none; font-family: 'Montserrat-Medium', 'Arial', 'Helvetica', sans-serif; color: var(--primary-black); text-align: center; text-transform: uppercase; background-color: transparent }
 
-    #main .button-wine { background-color: var(--primary-wine); color: var(--primary-white); }
+    .button-wine { background-color: var(--primary-wine); color: var(--primary-white); }
+
 
     @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
     {   
-        #main .button { font-size: 3.25vw; padding: 1.75vw 4.75vw; }
+        .main { padding: 0 12vw 0; }
+
+        .main ul { text-align: left; }
+
+        .main * + ul { margin-top: 2.5vw; }
+
+        .main ul li + li { margin-top: 1.5vw; }
+
+        .button { font-size: 3.85vw; padding: 2vw 4.75vw; }
     }
+
+    @media (min-width: $mqMinWidthDesktop) and (max-width: $mqMaxWidthDesktop)
+    {   
+        // .main { text-align: left; padding: 0 4vw 0vw; overflow: scroll; }
+
+        .button { font-size: 1.2vw; padding: 0.5vw 1.25vw; }
+    }
+
+    /* 
+        GLOBAL MODAL   
+    */
+    
+    .modal { }
+
+    /*
+        GLOBAL PRODUCTS
+    */
+
+    @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
+    { 
+        
+
+    }
+
 </style>

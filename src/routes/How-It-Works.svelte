@@ -8,18 +8,17 @@
     import { transition } from '../lib/js/transition.js';
     import anime from 'animejs';
 
-    import Masthead from '../components/Masthead.svelte';
+    import Masthead from '../components/MastheadComponent.svelte';
+    
     /*
         Exports
     */
-    // Used By Svelte-Routing - prevents console log warning
-    export let location;
 
 </script>
 
 <svelte:head>
-    <title>{ Store.pages.howitworks.title } | { Store.pages.base.title }</title>
-	<meta name="description" property="description" content="{ Store.pages.howitworks.description }">
+    <title>{ $Store.Pages.HowItWorks.Title } | { $Store.Pages.Base.Title }</title>
+	<meta name="description" property="description" content="{ $Store.Pages.HowItWorks.Description }">
 </svelte:head>
 
 <main id="main" class="main main-how-it-works">

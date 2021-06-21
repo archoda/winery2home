@@ -35,7 +35,7 @@
     $mqMinWidthDesktop: 768px;
     $mqMaxWidthDesktop: 1000000000px;
 
-    #button-menu { z-index: 20000000; top: 4vw; right: 4vw; border: none; background-color: transparent; overflow: hidden; }
+    #button-menu { z-index: 2000; top: 4vw; right: 4vw; border: none; background-color: transparent; overflow: hidden; }
 
     #button-menu,
     #button-menu-icon { position: absolute; }

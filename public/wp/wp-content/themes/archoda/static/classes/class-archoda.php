@@ -7,6 +7,12 @@ class Archoda
         // Silence is golden...
     }
 
+    function Test()
+    {
+        return 'test';
+    }
+
+
     public function WP_Post_Save_Hook()
     {
         add_action( 'save_post', function($post_ID, $post, $update)
@@ -253,39 +259,410 @@ class Archoda
         }, 11);
     }
 
-
-    function WP_Wineries_Get_All()
+    function WP_API_Wineries_All_Init()
     {
-        // $posts = get_posts(array(
-		// 	'post_type'			=> 'wineries',
-		// 	'posts_per_page'	=> -1,
-		// 	'order'				=> 'DESC',
-		// 	'compare'			=> Array(
-		// 							'key'	 		=> 'post_content',
-		// 							'value'			=> array('phone number'),
-		// 							'compare'		=> 'LIKE'
-		// 	)
-		// ));
-		// echo $posts[0]->ID;
-		// //var_dump($posts);
-		// echo print_r(get_fields($posts[0]->ID));
+        add_action( 'rest_api_init', function ()
+        {
+            register_rest_route( __NAMESPACE__ . '/wineries', '/(?P<products>\w+)(/(?P<shuffle>\w+))?', array(
+              'methods' => 'GET',
+              'callback' => array($this, 'WP_API_Wineries_All_Query'),
+            ) );
+        } );
+
+        add_action( 'rest_api_init', function ()
+        {
+            register_rest_route( __NAMESPACE__ . '/wineries-list', '/(?P<shuffle>\w+)', array(
+              'methods' => 'GET',
+              'callback' => array($this, 'WP_API_Wineries_All_List_Query'),
+            ) );
+        } );
+    }
+
+    function WP_API_Wineries_All_Query($request)
+    {
+
+        // Set Featured Wine Posts as Array.
+        $WP_Query_Results = array();
         
-        // $wpq = new WP_Query([
-        //     'post_type' => 'wineries',
-        //     'posts_per_page' => -1,
-        //     //'s' => 'phone number'
-        //     // 'meta_query' => [
-        //     // 	[
-        //     // 		'key' => 'post_content',
-        //     // 		'compare' => '>',
-        //     // 		'value' => 8,
-        //     // 		'type' => 'numeric'
-        //     // 	]
-        //     // ]
-        // ]);
+        // Set Query Object
+        $WP_Query = null;
 
-        // echo print_r($wpq, true);
+        $WP_Query_Args = [
+            'post_type' 		=> 'wineries',
+            'posts_per_page' 	=> -1,
+            'paged'          	=> max( 1, get_query_var( 'page' ) ),
+            'orderby'			=> 'ASC',
+            'meta_query'        => array(
+                                    'relation' => '&&',
+                                    // Ensure the Winery Has Products To Show
+                                    array(
+                                        'key' => 'products',
+                                        'value' => '0',
+                                        'compare' => '>',
+                                        'relation' => '&&'
+                                    ),
+                                )
+        ];
 
+        // Init the query
+        $WP_Query = new WP_Query($WP_Query_Args);
+        
+        //return $WP_Query;
+        // Set Response
+        if (count($WP_Query->posts) <= 0)
+        {   
+            // Set as 404 not found
+            $WP_Query_Response = new WP_Error( 'error', 'The search results Product could not be found.', array('status' => 404) );
+        }
+        else
+        {
+            // Fill Wine Posts Data
+            foreach($WP_Query->posts as $WP_Post)
+            {
+                
+                $WP_Post_Winery = get_fields($WP_Post->ID);
+                $WP_Post_Winery_WPId = $WP_Post->ID;
+                $WP_Post_Winery_Id = $WP_Post_Winery['id'];
+                $WP_Post_Winery_Name = $WP_Post_Winery['name'];
+                $WP_Post_Winery_Region = $WP_Post_Winery['region'];
+
+                // Get all products
+                foreach($WP_Post_Winery['products'] as $WP_Post_Winery_Product)
+                {
+                    // Append Winery info 
+                    $WP_Post_Winery_Product['winery'] = array(
+                        'wpid' => $WP_Post_Winery_WPId,
+                        'id' => $WP_Post_Winery_Id,
+                        'name' => $WP_Post_Winery_Name,
+                        'region' => $WP_Post_Winery_Region
+                    );
+                    
+                    array_push($WP_Query_Results, $WP_Post_Winery_Product);
+                }
+            }
+        
+            // Set response
+            if (empty($WP_Query_Results) || ($request['products'] != 'false' && count($WP_Post_Winery_Products) >= $request['products']))
+            {
+                $WP_Query_Response = new WP_Error( 'error', 'The search results found no matching products.', array('status' => 404) );
+            }
+            else
+            {
+                // Shuffle is random order required
+                if (isset($request['shuffle']) && $request['shuffle'] != 'false')
+                {
+                    shuffle( $WP_Query_Results );
+                }
+
+                $WP_Query_Response = $WP_Query_Results;
+            }
+        }
+
+
+        // Send response with Featured Wine Posts Data
+        return $WP_Query_Response;
+    }
+
+    function WP_API_Wineries_All_List_Query($request)
+    {
+
+        // Set Featured Wine Posts as Array.
+        $WP_Query_Results = array();
+        
+        // Set Query Object
+        $WP_Query = null;
+
+        $WP_Query_Args = [
+            'post_type' 		=> 'wineries',
+            'posts_per_page' 	=> -1,
+            'paged'          	=> max( 1, get_query_var( 'page' ) ),
+            'orderby'			=> 'ASC',
+            'meta_query'        => array(
+                                    'relation' => '&&',
+                                    // Ensure the Winery Has Products To Show
+                                    array(
+                                        'key' => 'products',
+                                        'value' => '0',
+                                        'compare' => '>',
+                                        'relation' => '&&'
+                                    ),
+                                )
+        ];
+
+        // Init the query
+        $WP_Query = new WP_Query($WP_Query_Args);
+ 
+        //return $WP_Query;
+        // Set Response
+        if (count($WP_Query->posts) <= 0)
+        {   
+            // Set as 404 not found
+            $WP_Query_Response = new WP_Error( 'error', 'The search results Product could not be found.', array('status' => 404) );
+        }
+        else
+        {
+            // Fill Wine Posts Data
+            foreach($WP_Query->posts as $WP_Post)
+            {
+                
+                $WP_Post_Winery = get_fields($WP_Post->ID);
+                $WP_Post_Winery_WPId = $WP_Post->ID;
+                $WP_Post_Winery_Id = $WP_Post_Winery['id'];
+                $WP_Post_Winery_Name = $WP_Post_Winery['name'];
+                $WP_Post_Winery_City = $WP_Post_Winery['city'];
+                $WP_Post_Winery_State = $WP_Post_Winery['state'];
+                $WP_Post_Winery_Region = $WP_Post_Winery['region'];
+                $WP_Post_Winery_Explore = $WP_Post_Winery['explore'];
+
+                array_push($WP_Query_Results, array(
+                    'wpid' => $WP_Post_Winery_WPId,
+                    'id' => $WP_Post_Winery_Id,
+                    'name' => $WP_Post_Winery_Name,
+                    'city' => $WP_Post_Winery_City,
+                    'state' => $WP_Post_Winery_State,
+                    'region' => $WP_Post_Winery_Region,
+                    'explore' => $WP_Post_Winery_Explore
+                ));
+            }
+        
+            // Set response
+            // Shuffle is random order required
+            if (isset($request['shuffle']) && $request['shuffle'] != 'false')
+            {
+                shuffle( $WP_Query_Results );
+            }
+
+            $WP_Query_Response = $WP_Query_Results;
+        }
+
+
+        // Send response with Featured Wine Posts Data
+        return $WP_Query_Response;
+    }
+
+    function WP_API_Wineries_Featured_Init()
+    {
+        add_action( 'rest_api_init', function ()
+        {
+            register_rest_route( __NAMESPACE__ . '/wineries/products/featured', '/(?P<id>\d+)(/(?P<shuffle>\w+))?', array(
+              'methods' => 'GET',
+              'callback' => array($this, 'WP_API_Wineries_Featured_Query'),
+            ) );
+        } );
+    }
+
+    function WP_API_Wineries_Featured_Query($request)
+    { 
+        // Set Featured Wine Posts as Array.
+        $WP_Query_Results = array();
+
+        // Set Response of Featured Wine Posts as Array.
+        $WP_Query_Response = '';
+        
+        // Set Query Object
+        $WP_Query = null;
+
+        $WP_Query_Args = [
+            'post_type' 		=> 'wineries',
+            'posts_per_page' 	=> -1,
+            'paged'          	=> max( 1, get_query_var( 'page' ) ),
+            'orderby'			=> 'ASC',
+            'meta_query'        => array(
+                                    'relation' => 'AND',
+                                    // Ensure the Winery Has Products To Show
+                                    array(
+                                        'key' => 'products',
+                                        'value' => '1',
+                                        'compare' => '>=',
+                                    ),
+                                )
+        ];
+
+        // Limit by ID i
+        if ($request["id"] && $request["id"] !== '0')
+        {
+            $WP_Query_Args['post__in'] = array($request["id"]);
+        }
+
+        // Init the query
+        $WP_Query = new WP_Query($WP_Query_Args);
+
+        // Set Response
+        if (count($WP_Query->posts) <= 0)
+        {   
+            // Set as 404 not found
+            $WP_Query_Response = new WP_Error( 'error', 'The search results found no results.', array('status' => 404) );
+        }
+        else
+        {
+            // Set 1 Featured Wine Posts Data
+            foreach($WP_Query->posts as $WP_Post)
+            {
+                $WP_Post_Winery = get_fields($WP_Post->ID);
+                $WP_Post_Winery_WPId = $WP_Post->ID;
+                $WP_Post_Winery_Id = $WP_Post_Winery['id'];
+                $WP_Post_Winery_Name = $WP_Post_Winery['name'];
+                $WP_Post_Winery_Region = $WP_Post_Winery['region'];
+
+                // Filter only one feature wine per-product (only looks for one, then stops)
+                foreach($WP_Post_Winery['products'] as $WP_Post_Winery_Product)
+                {
+                    if ($WP_Post_Winery_Product['featured'])
+                    {
+                        $WP_Post_Winery_Product['winery'] = array(
+                            'wpid' => $WP_Post_Winery_WPId,
+                            'id' => $WP_Post_Winery_Id,
+                            'name' => $WP_Post_Winery_Name,
+                            'region' => $WP_Post_Winery_Region
+                        );
+                        array_push($WP_Query_Results, $WP_Post_Winery_Product);
+                        break;
+                    }
+                }
+            }
+
+            // Set response
+            if (empty($WP_Query_Results))
+            {
+                $WP_Query_Response = new WP_Error( 'error', 'The search results found no matching products.', array('status' => 404) );
+            }
+            else
+            {
+                // Filter by shuffle if required
+                if (isset($request['shuffle']) && $request['shuffle'] != 'false')
+                {
+                    shuffle( $WP_Query_Results );
+                }
+
+                $WP_Query_Response = $WP_Query_Results;
+            }
+        }
+        
+        // Send response with Featured Wine Posts Data
+        return $WP_Query_Response;
+    }
+
+    function WP_API_Wineries_Filtered_Init()
+    {
+        add_action( 'rest_api_init', function ()
+        {
+            register_rest_route( __NAMESPACE__ . '/wineries/products/filtered', '/(?P<region>\w+)(/(?P<varietal>\w+))?(/(?P<shuffle>\w+))?', array(
+              'methods' => 'GET',
+              'callback' => array($this, 'WP_API_Wineries_Filtered_Query'),
+            ) );
+        });
+    }
+
+    function WP_API_Wineries_Filtered_Query($request)
+    {
+
+        // Set Featured Wine Posts as Array.
+        $WP_Query_Results = array();
+        
+        // Set Query Object
+        $WP_Query = null;
+
+        $WP_Query_Args = [
+            'post_type' 		=> 'wineries',
+            'posts_per_page' 	=> -1,
+            'paged'          	=> max( 1, get_query_var( 'page' ) ),
+            'orderby'			=> 'ASC',
+            'meta_query'        => array(
+                                    'relation' => '&&',
+                                    // Ensure the Winery Has Products To Show
+                                    array(
+                                        'key' => 'products',
+                                        'value' => '0',
+                                        'compare' => '>',
+                                    ),
+                                )
+        ];
+        
+        // Filter by region if required
+        if (isset($request['region']) && $request['region'] != 'false')
+        {
+            $WP_Query_Args['meta_query'][1] = array(
+                'key' => 'region',
+                'value' => $request['region'],
+                'compare' => 'like'
+            );
+        }   
+
+        // Init the query
+        $WP_Query = new WP_Query($WP_Query_Args);
+        
+        // Set Response
+        if (count($WP_Query->posts) <= 0)
+        {   
+            // Set as 404 not found
+            $WP_Query_Response = new WP_Error( 'error', 'The search results Product could not be found.', array('status' => 404) );
+        }
+        else
+        {
+            // Filter
+            foreach($WP_Query->posts as $WP_Post)
+            {
+                $WP_Post_Winery = get_fields($WP_Post->ID);
+                $WP_Post_Winery_WPId = $WP_Post->ID;
+                $WP_Post_Winery_Id = $WP_Post_Winery['id'];
+                $WP_Post_Winery_Name = $WP_Post_Winery['name'];
+                $WP_Post_Winery_Region = $WP_Post_Winery['region'];
+
+                // Filter wines by varietal
+                foreach($WP_Post_Winery['products'] as $WP_Post_Winery_Product)
+                {
+                    $WP_Post_Winery_Product_Filter_Valid = false;
+                    
+                    // Filter valid by varietal when required
+                    if (
+                        isset($request['varietal']) &&
+                        isset($request['varietal']) != 'false' && 
+                        (strpos(strtolower($WP_Post_Winery_Product['varietal']['value']), strtolower($request['varietal'])) || strtolower($WP_Post_Winery_Product['varietal']['value']) == strtolower($request['varietal']))
+                    )
+                    {
+                        $WP_Post_Winery_Product_Filter_Valid = true;
+                    }
+                    // Filter valid when not required
+                    else
+                    {
+                        $WP_Post_Winery_Product_Filter_Valid = true;
+                    }
+
+                    // Add all valid
+                    if ($WP_Post_Winery_Product_Filter_Valid)
+                    {
+                        // Append Winery info 
+                        $WP_Post_Winery_Product['winery'] = array(
+                            'wpid' => $WP_Post_Winery_WPId,
+                            'id' => $WP_Post_Winery_Id,
+                            'name' => $WP_Post_Winery_Name,
+                            'region' => $WP_Post_Winery_Region
+                        );
+                        array_push($WP_Query_Results, $WP_Post_Winery_Product);
+                    }
+                }
+            }
+        
+            // Set response
+            if (empty($WP_Query_Results))
+            {
+                $WP_Query_Response = new WP_Error( 'error', 'The search results found no matching products.', array('status' => 404) );
+            }
+            else
+            {
+                // Filter by shuffle if required
+                if (isset($request['shuffle']) && $request['shuffle'] != 'false')
+                {
+                    shuffle( $WP_Query_Results );
+                }
+
+                $WP_Query_Response = $WP_Query_Results;
+            }
+        }
+
+
+        // Send response with Featured Wine Posts Data
+        return $WP_Query_Response;
     }
 }
 

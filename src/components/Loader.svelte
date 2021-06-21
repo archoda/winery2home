@@ -3,116 +3,159 @@
     /*
         Imports
     */
-    import { onMount, createEventDispatcher } from 'svelte';
+    import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+    import { Store } from '../lib/js/store.js';
     import anime from 'animejs';
     import AnimeJSTime from '../lib/js/animejs-time.js';
-    import FetchClass from '../lib/js/fetch.js';
+    import LoaderClass from '../lib/js/LoaderClass.js';
 
-    /*
-        Import Comonents
-    */
     import W2HLogo from './W2HLogo.svelte';
 
 
-    export let type;
+    
+    /*  
+        Exports
+    */
 
-    let Fetch = FetchClass;
-    let FetchData = null;
-    export let FetchOptions;
-    const FetchDataDispatch = createEventDispatcher();
+    export let LoaderType;
 
-    export let classColor = null;
+    export let LoaderOptions;
 
+    export let LoaderClassColor = null;
 
-    export let radius = null;
-    $: radius = (window.outerWidth <= 500) ? 42 : 50; // mobile : desktop
+    let Loader = null;
 
-    export const LoaderCircleReInit = () =>
+    let LoaderResults = {
+                        Cached: false,
+                    };
+
+    const LoaderCompleteDispatch = createEventDispatcher();
+
+    const LoaderComplete = () =>
     {
-        console.log('call');
-    };
+        // Update Store Cache
+        if (LoaderResults.Cache) $Store.API.Cache = Array.from(LoaderResults.Cache);
+
+        // Dispatch Loader Data
+        LoaderCompleteDispatch('message', { data: LoaderResults });
+    }
 
     onMount(async () => {
+        
+        let loadAnimation = null;
 
-        anime({
-            targets: '.body',
-            opacity: [0,1],
-            scale: {
-                value: [0,1],
-                easing: 'spring(1, 80, 10, 0)',
-                delay: 500
-            },
-            duration: 10000,
-            direction: 'forward',
-            loop: false
-        });
-
-        anime({
-            targets: '.loader-circle-element',
-            opacity: [0,1],
-            scale: {
-                value: [0,1],
-                easing: 'spring(1, 80, 10, 0)',
-                delay: 500
-            },
-            duration: 5500,
-            direction: 'forward',
-            loop: false
-        });
-
-        const loadAnimation = anime({
-            targets: '#loader-circle-solid path',
-            strokeDashoffset: [anime.setDashoffset, 0],
-            duration: 5000,
+        // Init With Loader Hidden;
+        anime.timeline({
+            loop: false,
+        }).add({
+            targets: '#loader',
             direction: 'forward',
             easing: 'linear',
-            loop: false,
-            complete: () =>
+            opacity: {
+                value: [1,0],
+                duration: 0,
+                delay: 0,
+            },
+            delay: 0,
+            complete: () => 
             {
-                anime.timeline({
+                // Show the loader
+                anime({
+                    targets: '#loader',
                     direction: 'forward',
                     easing: 'linear',
-                    duration: 500,
-                    delay: 250,
+                    scale: {
+                        value: [0,1], 
+                        easing: 'easeOutBounce',
+                        duration: 500,
+                        delay: 0,
+                    },
+                    opacity: {
+                        value: [0,1],
+                        duration: 500,
+                        delay: 0,
+                    },
+                });
+                
+                // Show the loader circle
+                anime({
+                    targets: '.loader-circle-element',
+                    opacity: [0,1],
+                    scale: {
+                        value: [0,1],
+                        easing: 'spring(1, 80, 10, 0)',
+                        delay: 500
+                    },
+                    duration: 5500,
+                    direction: 'forward',
+                    delay: 1000,
+                    loop: false
+                });
+
+                // Spin the dotted loader circle for the duration
+                anime({
+                    targets: '#loader-circle #loader-circle-dotted',
+                    rotate: {
+                        value: 180,
+                        duration: 10000,
+                        easing: 'linear'
+                    },
+                    direction: 'forward',
+                    loop: true
+                });
+
+                // Animate the solid loader circle closed for the duration to complete the loader
+                loadAnimation = anime({
+                    targets: '#loader-circle-solid path',
+                    strokeDashoffset: [anime.setDashoffset, 0],
+                    duration: 5000,
+                    direction: 'forward',
+                    easing: 'linear',
                     loop: false,
-                })
-                .add({
-                    targets: '#loader-circle',
-                    duration: 250,
-                    opacity: [1,0],
-                })
-                .add({
-                    targets: '#loader',
-                    opacity: [1,0],
+                    delay: 1000,
                     complete: () =>
                     {
-
-                        // Dispatch Fetch Data
-                        FetchDataDispatch('message', { data: FetchData });
+                        anime.timeline({
+                            direction: 'forward',
+                            easing: 'linear',
+                            delay: 500,
+                            loop: false,
+                        })
+                        .add({
+                            targets: '#loader-circle',
+                            duration: 250,
+                            opacity: [1,0],
+                        })
+                        .add({
+                            targets: '#loader',
+                            opacity: [1,0],
+                            duration: 500,
+                            complete: () =>
+                            {
+                                LoaderComplete();
+                            }
+                        });
                     }
                 });
-            }
-        });
 
-        anime({
-            targets: '#loader-circle #loader-circle-dotted',
-            rotate: {
-                value: 180,
-                duration: 5500,
-                easing: 'linear'
             },
-            direction: 'forward',
-            loop: true
         });
 
 
-        // Create Fetch class
-        Fetch = new FetchClass({
-            options: FetchOptions
+        // Create Loader class
+        Loader = new LoaderClass({
+            options: LoaderOptions,
+            cache: $Store.API.Cache,
         });
         
-        // Set/Get Fetch Data
-        FetchData = await Fetch.PromiseAll();
+        // Set/Get Loader Data
+        LoaderResults = await Loader.PromiseAll();
+        
+        console.log('Loader Results...', LoaderResults);
+        // if (LoaderResults.Cached)
+        // {
+        //     LoaderComplete();
+        // }
         
         // Hasten the Loader animation for onComplete Callback
         let AnimeJSTimeManager = new AnimeJSTime(loadAnimation, 20);
@@ -121,11 +164,15 @@
 
     });
 
+    onDestroy(async () => {
+        
+    });
+
 
 
 </script>
 
-{#if type == "circle" }
+{#if LoaderType == "circle" }
 <div id="loader">
     <div id="loader-circle">
         <div id="loader-circle-container">
@@ -134,12 +181,12 @@
             </div>
             <div class="loader-circle-element">
                 <svg id="loader-circle-solid" viewBox="0 0 36 36">
-                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="{classColor}" stroke-width=".45" />
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="{LoaderClassColor}" stroke-width=".45" />
                 </svg>
             </div>
             <div class="loader-circle-element">
                 <svg id="loader-circle-dotted" viewBox="0 0 36 36">
-                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="{classColor}" stroke-width=".25" />
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="{LoaderClassColor}" stroke-width=".25" />
                 </svg>
             </div>
         </div>
@@ -149,7 +196,15 @@
 
 <style>
 
+    /*
+        LOADER
+    */
+
     #loader { z-index: 2000000; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--primary-wine); }
+
+    /*
+        LOADER TYPE: CIRCLE
+    */
 
     #loader-circle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 

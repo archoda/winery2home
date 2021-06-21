@@ -18,8 +18,6 @@
     /*
         Exports
     */
-    // Used By Svelte-Routing - prevents console log warning
-    export let location;
 
     onMount(async () => {
 
@@ -102,8 +100,8 @@
 </script>
 
 <svelte:head>
-    <title>{ Store.pages.agecheck.title } | { Store.pages.base.title }</title>
-	<meta name="description" property="description" content="{ Store.pages.agecheck.description }">
+    <title>{ $Store.Pages.AgeCheck.Title } | { $Store.Pages.Base.Title }</title>
+	<meta name="description" property="description" content="{ $Store.Pages.AgeCheck.Description }">
 </svelte:head>
 
 <main id="main" class="main main-age-check">
