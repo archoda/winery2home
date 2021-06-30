@@ -42,6 +42,12 @@
 
     onMount(async () => {
         
+        // Clear Any Modal
+        $Store.Modal.Class = '',
+        $Store.Modal.Type = '',
+        $Store.Modal.Active = false,
+        $Store.Modal.Data = {};
+
         let loadAnimation = null;
 
         // Init With Loader Hidden;
@@ -108,32 +114,30 @@
                 loadAnimation = anime({
                     targets: '#loader-circle-solid path',
                     strokeDashoffset: [anime.setDashoffset, 0],
-                    duration: 5000,
+                    duration: 10000,
                     direction: 'forward',
                     easing: 'linear',
                     loop: false,
                     delay: 1000,
                     complete: () =>
                     {
+                        LoaderComplete();
+
                         anime.timeline({
                             direction: 'forward',
                             easing: 'linear',
                             delay: 500,
-                            loop: false,
+                            loop: false
                         })
                         .add({
                             targets: '#loader-circle',
                             duration: 250,
-                            opacity: [1,0],
+                            opacity: [1,0]
                         })
                         .add({
                             targets: '#loader',
                             opacity: [1,0],
                             duration: 500,
-                            complete: () =>
-                            {
-                                LoaderComplete();
-                            }
                         });
                     }
                 });
@@ -151,17 +155,10 @@
         // Set/Get Loader Data
         LoaderResults = await Loader.PromiseAll();
         
-        console.log('Loader Results...', LoaderResults);
-        // if (LoaderResults.Cached)
-        // {
-        //     LoaderComplete();
-        // }
-        
         // Hasten the Loader animation for onComplete Callback
         let AnimeJSTimeManager = new AnimeJSTime(loadAnimation, 20);
             AnimeJSTimeManager.TimeStart();
             AnimeJSTimeManager.TimeRamp();
-
     });
 
     onDestroy(async () => {
@@ -213,17 +210,29 @@
     #loader-circle,
     #loader-circle * { display:inline-block; margin: 0; border: 0; padding: 0; box-sizing: border-box; }
 
-    #loader-circle,
-    #loader-circle #loader-circle-container,
-    #loader-circle-container .loader-circle-element { width: 35vw; height: 35vw; }
-
     #loader-circle-container .loader-circle-element svg,
     #loader-circle-container .loader-circle-element svg path { width: 100%; height: auto; }
-
-    #loader-circle-container #loader-circle-logo { padding: 10vw 9vw 0; }
 
     #loader-circle-container .loader-circle-element { position: absolute; top: 0; left: 0; }
 
     #loader-circle-dotted path { stroke-dasharray: 0.015, 1.15; stroke-linecap: round; }
+
+    @media (min-width: 0px) and (max-width: 767px)
+    {  
+        #loader-circle,
+        #loader-circle #loader-circle-container,
+        #loader-circle-container .loader-circle-element { width: 35vw; height: 35vw; }
+
+        #loader-circle-container #loader-circle-logo { padding: 10vw 9vw 0; }
+    }
+
+    @media (min-width: 768px) and (max-width: 100000000px)
+    {  
+        #loader-circle,
+        #loader-circle #loader-circle-container,
+        #loader-circle-container .loader-circle-element { width: 15vw; height: 15vw; }
+
+        #loader-circle-container #loader-circle-logo { padding: 4.5vw 4vw 0; }
+    }
     
 </style>

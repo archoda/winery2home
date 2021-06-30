@@ -13,7 +13,7 @@
 </script>
 
 
-<img id="{ImageId}" src="{ImageSrc}" class="responsive-img {[...ImageClass]}" width="{ImageWidth}" height="{ImageHeight}" title="{ImageTitle}"  alt="{ImageAlt}" />
+<img src="{ImageSrc}" class="responsive-img {[...ImageClass]}" width="{ImageWidth}" height="{ImageHeight}" title="{ImageTitle}"  alt="{ImageAlt}" />
 
 <style lang="scss">
     

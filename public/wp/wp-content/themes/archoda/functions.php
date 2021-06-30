@@ -7,13 +7,14 @@
  * @package Archoda
  */
 
+
 if ( ! defined( '_S_VERSION' ) ) {
 	// Replace the version number of the theme on each release.
 	define( '_S_VERSION', '1.0.0' );
 }
 
-
 if ( ! function_exists( 'archoda_setup' ) ) :
+	
 	/**
 	 * Sets up theme defaults and registers support for various WordPress features.
 	 *
@@ -21,8 +22,7 @@ if ( ! function_exists( 'archoda_setup' ) ) :
 	 * runs before the init hook. The init hook is too late for some features, such
 	 * as indicating support for post thumbnails.
 	 */
-
-
+		
 	// Set-up Report ALL Errors
 	ini_set('error_reporting', E_ALL);
 
@@ -31,9 +31,8 @@ if ( ! function_exists( 'archoda_setup' ) ) :
 	require_once(get_template_directory() . '/static/classes/class-archoda-email-handler.php');
 	require_once(get_template_directory() . '/static/classes/class-archoda-gravity-forms.php');
 	require_once(get_template_directory() . '/static/classes/class-archoda-snipcart.php');
-	
-	
-	function archoda_setup() {
+
+	 function archoda_setup() {
 		
 		try
 		{
@@ -140,10 +139,10 @@ if ( ! function_exists( 'archoda_setup' ) ) :
 			add_image_size('Winery Product Image Tablet', 9999, 600, false);
 			add_image_size('Winery Product Image Mobile', 9999, 392, false);
 			
-			add_image_size('Winery About Image Thumbnail', 150, false);
-			add_image_size('Winery About Image Desktop', 9999, 522, false);
-			add_image_size('Winery About Image Tablet', 9999, 422, false);
-			add_image_size('Winery About Image Mobile', 9999, 300, false);
+			add_image_size('Winery 16:9 Image Thumbnail', 9999, 150, false);
+			add_image_size('Winery 16:9 Image Desktop', 9999, 522, false);
+			add_image_size('Winery 16:9 Image Tablet', 9999, 422, false);
+			add_image_size('Winery 16:9 Image Mobile', 9999, 300, false);
 
 			/*
 				GRAVITY FORMS
@@ -173,17 +172,17 @@ if ( ! function_exists( 'archoda_setup' ) ) :
 		{
 			// Do nothing for now....
 		}
-		
+
 		/*
 		 * Make theme available for translation.
 		 * Translations can be filed in the /languages/ directory.
-		 * If you're building a theme based on Archoda, use a find and replace
+		 * If you're building a theme based on Winery2Home, use a find and replace
 		 * to change 'archoda' to the name of your theme in all the template files.
 		 */
 		load_theme_textdomain( 'archoda', get_template_directory() . '/languages' );
 
 		// Add default posts and comments RSS feed links to head.
-		//add_theme_support( 'automatic-feed-links' );
+		add_theme_support( 'automatic-feed-links' );
 
 		/*
 		 * Let WordPress manage the document title.
@@ -200,73 +199,110 @@ if ( ! function_exists( 'archoda_setup' ) ) :
 		 */
 		add_theme_support( 'post-thumbnails' );
 
-		// // This theme uses wp_nav_menu() in one location.
-		// register_nav_menus(
-		// 	array(
-		// 		'nav-main-menu' => esc_html__( 'Primary', 'archoda' ),
-		// 	)
-		// );
+		// This theme uses wp_nav_menu() in one location.
+		register_nav_menus(
+			array(
+				'menu-1' => esc_html__( 'Primary', 'archoda' ),
+			)
+		);
 
 		/*
 		 * Switch default core markup for search form, comment form, and comments
 		 * to output valid HTML5.
 		 */
-		// add_theme_support(
-		// 	'html5',
-		// 	array(
-		// 		'search-form',
-		// 		'comment-form',
-		// 		'comment-list',
-		// 		'gallery',
-		// 		'caption',
-		// 		'style',
-		// 		'script',
-		// 	)
-		// );
+		add_theme_support(
+			'html5',
+			array(
+				'search-form',
+				'comment-form',
+				'comment-list',
+				'gallery',
+				'caption',
+				'style',
+				'script',
+			)
+		);
+
+		// Set up the WordPress core custom background feature.
+		add_theme_support(
+			'custom-background',
+			apply_filters(
+				'archoda_custom_background_args',
+				array(
+					'default-color' => 'ffffff',
+					'default-image' => '',
+				)
+			)
+		);
+
+		// Add theme support for selective refresh for widgets.
+		add_theme_support( 'customize-selective-refresh-widgets' );
+
+		/**
+		 * Add support for core custom logo.
+		 *
+		 * @link https://codex.wordpress.org/Theme_Logo
+		 */
+		add_theme_support(
+			'custom-logo',
+			array(
+				'height'      => 250,
+				'width'       => 250,
+				'flex-width'  => true,
+				'flex-height' => true,
+			)
+		);
 	}
 endif;
 add_action( 'after_setup_theme', 'archoda_setup' );
 
+/**
+ * Set the content width in pixels, based on the theme's design and stylesheet.
+ *
+ * Priority 0 to make it available to lower priority callbacks.
+ *
+ * @global int $content_width
+ */
+function archoda_content_width() {
+	$GLOBALS['content_width'] = apply_filters( 'archoda_content_width', 640 );
+}
+add_action( 'after_setup_theme', 'archoda_content_width', 0 );
+
+/**
+ * Register widget area.
+ *
+ * @link https://developer.wordpress.org/themes/functionality/sidebars/#registering-a-sidebar
+ */
+function archoda_widgets_init() {
+	register_sidebar(
+		array(
+			'name'          => esc_html__( 'Sidebar', 'archoda' ),
+			'id'            => 'sidebar-1',
+			'description'   => esc_html__( 'Add widgets here.', 'archoda' ),
+			'before_widget' => '<section id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</section>',
+			'before_title'  => '<h2 class="widget-title">',
+			'after_title'   => '</h2>',
+		)
+	);
+}
+add_action( 'widgets_init', 'archoda_widgets_init' );
 
 /**
  * Enqueue scripts and styles.
  */
 function archoda_scripts() {
-	
-	global $pagenow;
+	wp_enqueue_style( 'archoda-style', get_stylesheet_uri(), array(), _S_VERSION );
+	wp_style_add_data( 'archoda-style', 'rtl', 'replace' );
 
-    if ( 'post.php' != $pagenow && 'post-new.php' != $pagenow ) {
-         wp_deregister_script('heartbeat');
-         wp_register_script('heartbeat', false);
-     }
+	wp_enqueue_script( 'archoda-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
 
-	// Remove default styles
-	//wp_enqueue_style( 'archoda-style', get_stylesheet_uri(), array(), _S_VERSION );
-	//wp_style_add_data( 'archoda-style', 'rtl', 'replace' );
-
-	// Remove default scripts
-	//wp_enqueue_script( 'archoda-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
-
-	// Remove Gutenburg Block Styles
-	wp_dequeue_style( 'wp-block-library' );
-    wp_dequeue_style( 'wp-block-library-theme' );
-    wp_dequeue_style( 'wc-block-style' ); // Remove WooCommerce block CSS
-
-
-	// Remove WP Comments
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}
 }
 add_action( 'wp_enqueue_scripts', 'archoda_scripts' );
 
-
-function archoda_init()
-{
-	// Unregister default script
-	//wp_deregister_script('wp-embed');
-}
-add_action('init', 'archoda_init');
 /**
  * Implement the Custom Header feature.
  */

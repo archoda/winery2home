@@ -19,7 +19,7 @@
 </script>
 
 <button on:click={Callback} id="{AttributeId}" title="{AttributeTitle}" class="button-close {AttributeClass}" {...AttributeDataset}>
-    <ImageComponent ImageClass={['button-close-icon']} ImageSrc={$Store.API.Root + '/lib/images/Button-Close-Circle.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle='Modal Close' ImageAlt='Modal Close Icon' ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />                    
+    <ImageComponent ImageClass={['button-close-icon']} ImageSrc={'/lib/images/Button-Close-Circle.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle='Modal Close' ImageAlt='Modal Close Icon' ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />                    
 </button>
 
 <style lang="scss">

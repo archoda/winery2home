@@ -84,7 +84,6 @@
 
     const ProductDetailsClick = (Event) =>
     {
-        console.log('Product Details Click Callback Called');
         $Store.Modal.Type = 'ProductDetails';
         $Store.Modal.Data.Product = Product;
         $Store.Modal.Active = true;
@@ -96,19 +95,17 @@
 
     onMount(() =>
     {
-        console.log('Product Panel Loaded', Product.winery.name);
-        
-        if (ProductInitCallback) {
+         if (ProductInitCallback) {
             ProductInitCallback();
         }
         else
         {
-            console.log('No Carousel to Set');
+            // No Carousel
         }
     });
 
     afterUpdate(() => { 
-        console.log('Carousel on After Update for Product Component Called');
+       // Do Something...
     });
 </script>
 
@@ -125,10 +122,10 @@
                 <div class="product-rating-badge">
                     <span class="product-rating-large">{Rating}</span>
                     <span class="product-rating-small">Points</span>
-                    <ImageComponent ImageClass={['product-image-badge']} ImageSrc={$Store.API.Root + '/lib/images/product-rating-badge.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Product Rating Badge'} ImageAlt={'Product Rating Badge'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
+                    <ImageComponent ImageClass={['product-image-badge']} ImageSrc={'/lib/images/product-rating-badge.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Product Rating Badge'} ImageAlt={'Product Rating Badge'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
                 </div>
                 
-                <ImageComponent ImageClass={['product-image-details']} ImageSrc={$Store.API.Root + '/lib/images/button-product-details.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle='{Product.name} Details' ImageAlt='{Product.name} Details' ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
+                <ImageComponent ImageClass={['product-image-details']} ImageSrc={'/lib/images/button-product-details.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle='{Product.name} Details' ImageAlt='{Product.name} Details' ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
                 
                 {#each Array(4) as _, Index}
                 <ImagePictureComponent ImageId={Image.id} ImageClass='product-image product-image-{Index}' ImageSrc={ImageMobileSrc} ImageWidth={ImageMobileWidth} ImageHeight={ImageMobileHeight} ImageTitle={Image.title} ImageAlt={Image.alt} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
@@ -140,7 +137,7 @@
                 {Product.name}
             </div>
 
-            <ButtonComponent AttributeClass={"button button-wine product-button-add-item snipcart-add-item"} {AttributeDataset} on:click={ () => { console.log('add button clicked')}}>Add To Cart</ButtonComponent>
+            <ButtonComponent AttributeClass={"button button-wine product-button-add-item snipcart-add-item"} {AttributeDataset}>Add To Cart</ButtonComponent>
 
         </div>
         {/if}
@@ -194,7 +191,7 @@
                                 <div class="product-rating-badge">
                                     <span class="product-rating-large">{Rating}</span>
                                     <span class="product-rating-small">Points</span>
-                                    <ImageComponent ImageClass={['product-image-badge']} ImageSrc={$Store.API.Root + '/lib/images/product-rating-badge.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Product Rating Badge'} ImageAlt={'Product Rating Badge'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
+                                    <ImageComponent ImageClass={['product-image-badge']} ImageSrc={'/lib/images/product-rating-badge.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Product Rating Badge'} ImageAlt={'Product Rating Badge'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
                                 </div>
                                 
                                 {#each Array(4) as _, Index}
@@ -219,7 +216,7 @@
                                     <button class="product-qty-increment" on:click={() => { return QtyUpdate(Qty+1) } }>+</button>
                                     <button class="product-qty-decrement" on:click={() => { return QtyUpdate(Qty-1); } }>-</button>
                                 </div>
-                                <ButtonComponent AttributeClass={"button button-wine product-button-add-item snipcart-add-item"} {AttributeDataset} on:click={ () => { console.log('add button clicked')}}>Add To Cart</ButtonComponent>
+                                <ButtonComponent AttributeClass={"button button-wine product-button-add-item snipcart-add-item"} {AttributeDataset}>Add To Cart</ButtonComponent>
                             </div>
 
                         </div>
@@ -239,7 +236,7 @@
 
             </div>
         </div>
-        <!-- <ImagePictureComponent ImageId={'modal-background'} ImageClass='modal-background' ImageSrc={$Store.API.Root + '/lib/images/_onionskin-modal-product-details-mobile.png'} ImageWidth={ImageMobileWidth} ImageHeight={ImageMobileHeight} ImageTitle={'Background-Image'} ImageAlt={'Background-Image'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /> -->
+        <!-- <ImagePictureComponent ImageId={'modal-background'} ImageClass='modal-background' ImageSrc={'/lib/images/_onionskin-modal-product-details-mobile.png'} ImageWidth={ImageMobileWidth} ImageHeight={ImageMobileHeight} ImageTitle={'Background-Image'} ImageAlt={'Background-Image'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /> -->
         {/if}
 
 {/if}

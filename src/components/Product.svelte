@@ -52,7 +52,7 @@
     let ImageSizes = Object.entries(Image.sizes);
     let ImageMobileSrcString = ImageSizes[27][1].split('.io')[1].split('/');
     //let ImageMobileSrcString = ImageSizes[27][1].split(':')[2].split('/'); -- when done using ngrok...
-    let ImageMobileSrc = $Store.API.Root + '/' + ImageMobileSrcString.slice(1, ImageMobileSrcString.length).join('/');
+    let ImageMobileSrc = '/' + ImageMobileSrcString.slice(1, ImageMobileSrcString.length).join('/');
     let ImageMobileDimensions = (ImageMobileSrc.split('.')[1].split('-')).pop().split('x');
     let ImageMobileWidth = ImageMobileDimensions[0];
     let ImageMobileHeight = ImageMobileDimensions[1];
@@ -92,12 +92,12 @@
         'data-item-url': `${$Store.API.Root}/wp/wp-json/snipcart/validate/product/${WPId}/${Id}/${Sku}`,
         'data-item-image': `${ImageMobileSrc}`,
         'data-item-quantity': `${Qty}`,
+        'data-item-description' : `${Product.description.replace(/(<([^>]+)>)/ig, '')}`,
         'data-item-stackable': `always`
     };
 
     const ProductDetailsClick = (Event) =>
     {
-        console.log('Product Details Click Callback Called', Event.target);
         $Store.Modal.Type = 'ProductDetails';
         $Store.Modal.Data.Product = Product;
         $Store.Modal.Active = true;
@@ -111,19 +111,17 @@
 
     onMount(() =>
     {
-        console.log('Product Panel Loaded', Product.winery.name);
-        
-        if (ProductInitCallback) {
+         if (ProductInitCallback) {
             ProductInitCallback();
         }
         else
         {
-            console.log('No Carousel to Set');
+            // No Carousel
         }
     });
 
     afterUpdate(() => { 
-        console.log('Carousel on After Update for Product Component Called');
+        
     });
 </script>
 
@@ -144,10 +142,10 @@
                 <div class="product-rating-badge">
                     <span class="product-rating-large">{Rating}</span>
                     <span class="product-rating-small">Points</span>
-                    <ImageComponent ImageClass={['product-image-badge']} ImageSrc={$Store.API.Root + '/lib/images/product-rating-badge.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Product Rating Badge'} ImageAlt={'Product Rating Badge'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
+                    <ImageComponent ImageClass={['product-image-badge']} ImageSrc={'/lib/images/icon-badge.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Product Rating Badge'} ImageAlt={'Product Rating Badge'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
                 </div>
                 
-                <ImageComponent ImageClass={['product-image-details']} ImageSrc={$Store.API.Root + '/lib/images/button-product-details.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle='{Product.name} Details' ImageAlt='{Product.name} Details' ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
+                <ImageComponent ImageClass={['product-image-details']} ImageSrc={'/lib/images/button-product-details.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle='{Product.name} Details' ImageAlt='{Product.name} Details' ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
                 
                 {#each Array(4) as _, Index}
                 <ImagePictureComponent ImageId={Image.id} ImageClass='product-image product-image-{Index}' ImageSrc={ImageMobileSrc} ImageWidth={ImageMobileWidth} ImageHeight={ImageMobileHeight} ImageTitle={Image.title} ImageAlt={Image.alt} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
@@ -172,10 +170,10 @@
                     <div class="product-rating-badge">
                         <span class="product-rating-large">{Rating}</span>
                         <span class="product-rating-small">Points</span>
-                        <ImageComponent ImageClass={['product-image-badge']} ImageSrc={$Store.API.Root + '/lib/images/product-rating-badge.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Product Rating Badge'} ImageAlt={'Product Rating Badge'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
+                        <ImageComponent ImageClass={['product-image-badge']} ImageSrc={'/lib/images/icon-badge.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Product Rating Badge'} ImageAlt={'Product Rating Badge'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
                     </div>
                     
-                    <ImageComponent ImageClass={['product-image-details']} ImageSrc={$Store.API.Root + '/lib/images/button-product-details.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle='{Product.name} Details' ImageAlt='{Product.name} Details' ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
+                    <ImageComponent ImageClass={['product-image-details']} ImageSrc={'/lib/images/button-product-details.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle='{Product.name} Details' ImageAlt='{Product.name} Details' ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
                     
                     {#each Array(4) as _, Index}
                     <ImagePictureComponent ImageId={Image.id} ImageClass='product-image product-image-{Index}' ImageSrc={ImageMobileSrc} ImageWidth={ImageMobileWidth} ImageHeight={ImageMobileHeight} ImageTitle={Image.title} ImageAlt={Image.alt} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
@@ -193,7 +191,7 @@
                         <button class="product-qty-increment" on:click={() => { return QtyUpdate(Qty+1) } }>+</button>
                         <button class="product-qty-decrement" on:click={() => { return QtyUpdate(Qty-1); } }>-</button>
                     </div>
-                    <ButtonComponent AttributeClass={"button button-wine product-button-add-item snipcart-add-item"} {AttributeDataset} on:click={ () => { console.log('add button clicked')}}>Add To Cart</ButtonComponent>
+                    <ButtonComponent AttributeClass={"button button-wine product-button-add-item snipcart-add-item"} {AttributeDataset}>Add To Cart</ButtonComponent>
                 </div>
 
             </div>
@@ -244,7 +242,7 @@
                                 <div class="product-rating-badge">
                                     <span class="product-rating-large">{Rating}</span>
                                     <span class="product-rating-small">Points</span>
-                                    <ImageComponent ImageClass={['product-image-badge']} ImageSrc={$Store.API.Root + '/lib/images/product-rating-badge.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Product Rating Badge'} ImageAlt={'Product Rating Badge'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
+                                    <ImageComponent ImageClass={['product-image-badge']} ImageSrc={'/lib/images/icon-badge.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Product Rating Badge'} ImageAlt={'Product Rating Badge'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
                                 </div>
                                 
                                 {#each Array(4) as _, Index}
@@ -261,7 +259,7 @@
                                     <button class="product-qty-increment" on:click={() => { return QtyUpdate(Qty+1) } }>+</button>
                                     <button class="product-qty-decrement" on:click={() => { return QtyUpdate(Qty-1); } }>-</button>
                                 </div>
-                                <ButtonComponent AttributeClass={"button button-wine product-button-add-item snipcart-add-item"} {AttributeDataset} on:click={ () => { console.log('add button clicked')}}>Add To Cart</ButtonComponent>
+                                <ButtonComponent AttributeClass={"button button-wine product-button-add-item snipcart-add-item"} {AttributeDataset}>Add To Cart</ButtonComponent>
                             </div>
 
                         </div>
@@ -277,7 +275,7 @@
                             
                             {#if TastingNotes }
                             <div class="product-detail-item">
-                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={$Store.API.Root + '/lib/images/icon-tasting-notes.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Tasting Notes Clipboard Icon Graphic'} ImageAlt={'Tasting Notes Clipboard Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
+                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={'/lib/images/icon-tasting-notes.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Tasting Notes Clipboard Icon Graphic'} ImageAlt={'Tasting Notes Clipboard Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
                                 <div class="product-detail-header">Tasting Notes</div>
                                 {#each TastingNotes as Item}
                                 <div class="product-detail-link">
@@ -289,7 +287,7 @@
 
                             {#if RatingsReviews}
                             <div class="product-detail-item">
-                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={$Store.API.Root + '/lib/images/icon-ratings-reviews.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Ratings Reviews Stars Icon Graphic'} ImageAlt={'Ratings Reviews Stars Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
+                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={'/lib/images/icon-ratings-reviews.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Ratings Reviews Stars Icon Graphic'} ImageAlt={'Ratings Reviews Stars Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
                                 <div class="product-detail-header">Ratings/Reviews</div>
                                 {#each RatingsReviews as Item}
                                 <div class="product-detail-link">
@@ -301,14 +299,14 @@
 
                             {#if Volume}
                             <div class="product-detail-item">
-                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={$Store.API.Root + '/lib/images/icon-alcohol-volume.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Alcohol/Water Drop Icon Graphic'} ImageAlt={'Alcohol/Water Drop Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
+                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={'/lib/images/icon-alcohol-volume.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Alcohol/Water Drop Icon Graphic'} ImageAlt={'Alcohol/Water Drop Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
                                 <div class="product-detail-header">{@html Volume}% Alc.</div>
                             </div>
                             {/if}
 
                             {#if FoodPairings}
                             <div class="product-detail-item">
-                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={$Store.API.Root + '/lib/images/icon-food-pairings.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Food Pairings Waitstaff Hand Carring Food Platter Icon Graphic'} ImageAlt={'Food Pairings Waitstaff Hand Carring Food Platter Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
+                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={'/lib/images/icon-food-pairings.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Food Pairings Waitstaff Hand Carring Food Platter Icon Graphic'} ImageAlt={'Food Pairings Waitstaff Hand Carring Food Platter Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
                                 <div class="product-detail-header">Food Pairings</div>
                                 {#each FoodPairings as Item}
                                 <div class="product-detail-link">
@@ -330,7 +328,7 @@
                     <div class="product-rating-badge">
                         <span class="product-rating-large">{Rating}</span>
                         <span class="product-rating-small">Points</span>
-                        <ImageComponent ImageClass={['product-image-badge']} ImageSrc={$Store.API.Root + '/lib/images/product-rating-badge.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Product Rating Badge'} ImageAlt={'Product Rating Badge'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
+                        <ImageComponent ImageClass={['product-image-badge']} ImageSrc={'/lib/images/icon-badge.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Product Rating Badge'} ImageAlt={'Product Rating Badge'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
                     </div>
                     
                     {#each Array(4) as _, Index}
@@ -380,7 +378,7 @@
                                     <button class="product-qty-increment" on:click={() => { return QtyUpdate(Qty+1) } }>+</button>
                                     <button class="product-qty-decrement" on:click={() => { return QtyUpdate(Qty-1); } }>-</button>
                                 </div>
-                                <ButtonComponent AttributeClass={"button button-wine product-button-add-item snipcart-add-item"} {AttributeDataset} on:click={ () => { console.log('add button clicked')}}>Add To Cart</ButtonComponent>
+                                <ButtonComponent AttributeClass={"button button-wine product-button-add-item snipcart-add-item"} {AttributeDataset}>Add To Cart</ButtonComponent>
                             </div>
 
                         </div>
@@ -396,7 +394,7 @@
                             
                             {#if TastingNotes}
                             <div class="product-detail-item">
-                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={$Store.API.Root + '/lib/images/icon-tasting-notes.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Tasting Notes Clipboard Icon Graphic'} ImageAlt={'Tasting Notes Clipboard Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
+                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={'/lib/images/icon-tasting-notes.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Tasting Notes Clipboard Icon Graphic'} ImageAlt={'Tasting Notes Clipboard Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
                                 <div class="product-detail-header">Tasting Notes</div>
                                 {#each TastingNotes as Item}
                                 <div class="product-detail-link">
@@ -408,7 +406,7 @@
 
                             {#if RatingsReviews}
                             <div class="product-detail-item">
-                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={$Store.API.Root + '/lib/images/icon-ratings-reviews.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Ratings Reviews Stars Icon Graphic'} ImageAlt={'Ratings Reviews Stars Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
+                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={'/lib/images/icon-ratings-reviews.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Ratings Reviews Stars Icon Graphic'} ImageAlt={'Ratings Reviews Stars Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
                                 <div class="product-detail-header">Ratings/Reviews</div>
                                 {#each RatingsReviews as Item}
                                 <div class="product-detail-link">
@@ -420,7 +418,7 @@
 
                             {#if FoodPairings}
                             <div class="product-detail-item">
-                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={$Store.API.Root + '/lib/images/icon-food-pairings.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Food Pairings Waitstaff Hand Carring Food Platter Icon Graphic'} ImageAlt={'Food Pairings Waitstaff Hand Carring Food Platter Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
+                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={'/lib/images/icon-food-pairings.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Food Pairings Waitstaff Hand Carring Food Platter Icon Graphic'} ImageAlt={'Food Pairings Waitstaff Hand Carring Food Platter Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
                                 <div class="product-detail-header">Food Pairings</div>
                                 {#each FoodPairings as Item}
                                 <div class="product-detail-link">
@@ -432,7 +430,7 @@
 
                             {#if Volume}
                             <div class="product-detail-item">
-                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={$Store.API.Root + '/lib/images/icon-alcohol-volume.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Alcohol/Water Drop Icon Graphic'} ImageAlt={'Alcohol/Water Drop Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
+                                <div class="product-detail-icon"><ImageComponent ImageClass={''} ImageSrc={'/lib/images/icon-alcohol-volume.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Alcohol/Water Drop Icon Graphic'} ImageAlt={'Alcohol/Water Drop Icon Graphic'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /></div>
                                 <div class="product-detail-header">{@html Volume}% Alc.</div>
                             </div>
                             {/if}
@@ -491,46 +489,55 @@
         .products-home .product-image-1 { transform: translate(-16vw, 0) scale(.85); }
         .products-home .product-image-2 { transform: translate(16vw, 0) scale(.85); }
 
-        .products-home .product-title { margin: 6vw 0 0; font-size: 4.5vw; display: grid; text-align: center; height: 11vw; align-items: center; }
+        .products-home .product-title { margin: 6vw 0 0; padding: 0 17vw; font-size: 5vw; display: grid; text-align: center; height: 11vw; align-items: center; }
         
         /*
             SHOP PRODUCTS CAROUSEL
         */
 
-        .products-shop { margin-top: 8vh; padding: 0 8vw; }
+        .products-shop { margin-top: 10vw; padding: 0 8vw; }
         
-        .products-shop div.product-image {  margin: 0 0 0 3vw; }
+        .products-shop div.product-image { }
 
-        .products-shop img.product-image { width: 15.25vw; margin: 0 0 2vw 0; }
+        .products-shop img.product-image { width: 18.25vw; margin: 0 0 2vw 0; }
 
-        .products-shop img.product-image-1 { transform: translate(-3.15vw, 0) scale(.85); }
-        .products-shop img.product-image-2 { transform: translate(3.15vw, 0) scale(.85); }
+        .products-shop img.product-image-0 { opacity: 0; }
 
-        .products-shop .product-rating-badge { transform: translate(3.25vw, 2.25vw) scale(0.425); width: 7.5vw; height: auto; }
+        .products-shop img.product-image-1 { left: 50%; transform: translate(-24.15vw, 0) scale(.85); }
+        .products-shop img.product-image-2 { left: 50%; transform: translate(5.15vw, 0) scale(.85); }
+        .products-shop img.product-image-3 { left: 50%; transform: translate(-50%, 0); }
+
+        .products-shop .product-rating-badge { transform: translate(60.25vw, 22.25vw) scale(1.75); width: 7.5vw; height: auto; }
             
         .products-shop .product-rating-large { position: absolute; z-index: 2; font-size: 3.15vw; transform: translate(1.58vw, 1.25vw); }
         .products-shop .product-rating-small { position: absolute; z-index: 2; font-size: 1.25vw; transform: translate(1.15vw, 4.55vw); }
             
-        .products-shop .product-image-details { cursor: pointer; position: absolute; z-index: 1; bottom: 1vw; left: 1vw; width: 2.25vw; height: 2.25vw; }
+        .products-shop .product-image-details { cursor: pointer; position: absolute; z-index: 1; transform: translate(-50%, 0) scale(4); bottom: 2vw; left: 50%; width: 2.25vw; height: 2.25vw; }
 
         .products-shop .product-buy {}
 
-        .products-shop .product-title { font-size: 1.75vw; color: var(--primary-wine); display: grid; align-items: end; height: 5.75vw; }
+        .products-shop .product-title { font-size: 5vw; width: 100%; padding: 0 17vw; margin: 6vw 0 0; }
 
-        .products-shop .product-winery { margin: 0.25vw 0 0; }
+        .products-shop .product-winery { margin: 2vw 0 0; }
 
-        .products-shop .product-buy-price { margin: .85vw 0 0; }
+        .products-shop .product-buy-price { margin: 4vw 0 0; }
 
-        .products-shop .product-buy-price-dollars { font-size: 2vw; }
+        .products-shop .product-buy-price-dollars { font-size: 10vw; }
 
-        .products-shop .product-buy-price-cents { display: inline-block; transform: translate(0,-.9vw); }
+        .products-shop .product-buy-price-cents {  font-size: 5vw; display: inline-block; transform: translate(0,-4vw); }
 
-        .products-shop .product-buy-note { font-size: .625vw; margin: .25vw 0 .50vw; }
+        .products-shop .product-buy-note { font-size: 2.75vw; margin: .25vw 0 .50vw; }
 
-        .products-shop .product-qty-input { text-align: center; width: 11.25vw; margin: .25vw 0 0; }
+        .products-shop .product-buy-qty { position: relative; display: inline-block; margin: 6vw 0 18vw; }
+
+        .products-shop .product-qty-input { text-align: center; display: inline-block; width: 37vw; margin: 0; }
 
         .products-shop .product-qty-increment,
-        .products-shop .product-qty-decrement { position: absolute; top: 10vw; }
+        .products-shop .product-qty-decrement { font-size: 4vw; position: absolute; top: 0; margin: 0; padding: 2vw; border: .65vw solid var(--primary-tan-dark); }
+
+        .products-shop .product-qty-increment { top: 0; bottom: 0; right: 0vw; }
+
+        .products-shop .product-qty-decrement { top: 0; bottom: 0; left: 0vw; }
 
         .products-shop .product-button-add-item { margin: .5vw 0 0; }
 
@@ -563,7 +570,10 @@
 
         .product-details-item .tab-panels { top: 62vw; }
 
-        .product-details-item .tab-panel { text-align: center; }
+        .product-details-item .tab-panel { text-align: center; padding: 0 12vw; }
+
+        .product-details-item .tab-panel:nth-of-type(2),
+        .product-details-item .tab-panel:nth-of-type(2) * { text-align: left; }
 
         .product-details-item .tab { position: relative; border: none; width: 100%; max-width: 68vw; height: 14vw; margin: 0 0 8vw; background-color: transparent; }
 
@@ -571,7 +581,7 @@
 
         .product-details-item .tab button { text-align: center; border: none; margin: 0; padding: 0; bottom: 0; left: 0; background: transparent; width: 100%; height: 100%; }
 
-        .product-details-item .tab .tab-label { font-family: "Montserrat-Medium", "Arial", "Helvetica", sans-serif; font-size: 4vw; height: auto; display: block; margin: 3.5vw 0 3.5vw; background-color: initial; }
+        .product-details-item .tab .tab-label { font-family: "Montserrat-Medium", "Arial", "Helvetica", sans-serif; font-size: 3.05vw; height: auto; display: block; margin: 3.5vw 0 3.5vw; background-color: initial; }
 
         .product-details-item .tab .tab-label,
         .product-details-item .tab .tab-bar,
@@ -587,12 +597,12 @@
 
         /* -- Tab Panel = Buy It */
 
-        .product-details-item .product-rating-badge { transform: translate(67.5vw, 21.25vw); width: 20vw; height: auto; }
+        .product-details-item .product-rating-badge { transform: translate(55.5vw, 21.25vw); width: 20vw; height: auto; }
         .product-details-item .product-rating-large { position: absolute; z-index: 3; font-size: 7vw; transform: translate(5.85vw, 4.5vw); }
         .product-details-item .product-rating-small { position: absolute; z-index: 3; font-size: 2.65vw; transform: translate(4.85vw, 11.25vw); }
         .product-details-item .product-rating-badge img { transform: scale(0.775); }
 
-        .product-details-item img.product-image { padding: 0 38.5vw; }
+        .product-details-item img.product-image { padding: 0 26.5vw; }
 
         .product-details-item img.product-image-0 { opacity: 0; }
         .product-details-item img.product-image-1 { z-index: 1; transform: translate(-18vw, 0) scale(.85); }
@@ -601,7 +611,7 @@
 
         .product-details-item .product-buy-note { font-size: 3vw; margin-bottom: 4vw; }
         
-        .product-details-item .product-buy { display: grid; grid-auto-columns: 2fr; grid-column-gap: 4vw; margin: 4vw 11vw; }
+        .product-details-item .product-buy { display: grid; grid-auto-columns: 2fr; grid-column-gap: 4vw; margin: 4vw 0; }
 
         .product-details-item .product-buy-price,
         .product-details-item .product-buy-note { grid-column: 1/span 2; }
@@ -611,31 +621,29 @@
 
         .product-details-item .product-buy-qty { position: relative; }
 
-        .product-details-item .product-qty-input,
-        .product-details-item .product-qty-input:readonly { overflow: hidden; text-align: center; border: .05vw solid var(--primary-tan-dark); }
+        .product-details-item .product-qty-input { overflow: hidden; text-align: center; border: .05vw solid var(--primary-tan-dark); }
 
         .product-details-item .product-qty-increment,
-        .product-details-item .product-qty-decrement { font-size: 6vw; position: absolute; width: 7.25vw; margin: 0; border: .05vw solid var(--primary-tan-dark); background-color: transparent; }
+        .product-details-item .product-qty-decrement { font-size: 6vw; position: absolute; top: 0; bottom: 0; width: 7.25vw; height: 8vw; margin: 0; border: .05vw solid var(--primary-tan-dark); background-color: transparent; }
 
-        .product-details-item .product-qty-increment { top: 0; left: 0; } /* transform: translate(-7.35vw, 0vw); */
-        .product-details-item .product-qty-decrement { top: 0; right: 0; } /* transform: translate(-7.35vw, 0vw); */
+        .product-details-item .product-qty-increment { right: 0; }
+        .product-details-item .product-qty-decrement { left: 0; }
 
+        .product-details-item .product-button-add-item { font-size: 3.65vw; width: 100%; margin: 0; }
 
-        .product-details-item .product-button-add-item { width: 100%; margin: 0; }
+        .product-detail-item { width: 100%; }
 
-        .product-details-item .product-detail-item { width: 100%; }
+        .product-detail-item + .product-detail-item { margin-top: 10vw; }
 
-        .product-details-item .product-detail-item + .product-detail-item { margin-top: 10vw; }
+        .product-detail-item > div + div { margin-top: 2vw; }
 
-        .product-details-item .product-detail-item > div + div { margin-top: 2vw; }
-
-        .product-details-item .product-detail-icon img { width: 8vw; }
+        .product-detail-item .product-detail-icon img { width: 8vw; }
         
-        .product-details-item .product-detail-header { font-size: 5vw; } 
+        .product-detail-item .product-detail-header { font-size: 5vw; } 
 
-        .product-details-item .product-detail-header + .product-detail-link { margin-top: 2.25vw; } 
+        .product-detail-item .product-detail-header + .product-detail-link { margin-top: 2.25vw; } 
 
-        .product-detail-link + .product-detail-link { margin-top: 2vw; } 
+        .product-detail-item .product-detail-link + .product-detail-link { margin-top: 2vw; } 
 
     }
 
@@ -668,7 +676,9 @@
             SHOP: PRODUCT
         */
         
-        .products-shop { margin-top: 11vh; padding: 0 8vw; }
+        .products-shop form label span { font-size: 1vw; margin: 1vw 0 0; }
+
+        .products-shop { margin-top: 0; padding: 0 8vw; }
 
         .products-shop div.product-image {  margin: 0 0 0 3vw; }
 
@@ -689,7 +699,7 @@
 
         .products-shop .product-buy { width: 19vw; padding: 0 0 0 5.5vw; }
 
-        .products-shop .product-title { font-size: 1.75vw; color: var(--primary-wine); display: grid; align-items: end; height: 5.75vw; }
+        .products-shop .product-title { font-size: 1.75vw; display: grid; align-items: end; height: 5.75vw; }
 
         .products-shop .product-winery { margin: 0.25vw 0 0; }
 
@@ -701,10 +711,16 @@
 
         .products-shop .product-buy-note { font-size: .625vw; margin: .25vw 0 .50vw; }
 
+        .products-shop .product-buy-qty { position: relative; }
+
         .products-shop .product-qty-input { text-align: center; width: 11.25vw; margin: .25vw 0 0; }
 
         .products-shop .product-qty-increment,
-        .products-shop .product-qty-decrement { position: absolute; top: 10vw; }
+        .products-shop .product-qty-decrement { font-size: 1.5vw; position: absolute; border: .15vw solid var(--primary-tan-dark); width: 2vw; height: 2.5vw; }
+
+        .products-shop .product-qty-increment { right: 2.35vw; bottom: 0px; }
+
+        .products-shop .product-qty-decrement { left: 0vw; bottom: 0px; }
 
         .products-shop .product-button-add-item { margin: .5vw 0 0; }
 
@@ -733,7 +749,7 @@
         .product-details-item .tab-control,
         .product-details-item .tab { list-style: none; margin: 0; padding: 0; }
 
-        .product-details-item .tab-control { display: inline-grid; grid-template-columns: 1fr 1fr 1fr; grid-column-gap: .3vw; width: 14vw; padding: 2.5vw 0 0; }
+        .product-details-item .tab-control { display: inline-grid; grid-template-columns: 1fr 1fr 1fr; grid-column-gap: .5vw; width: 20vw; padding: 2.5vw 0 0; }
 
         .product-details-item .tab-panels { top: 30vw;}
 
@@ -742,9 +758,9 @@
         .product-details-item .tab-panel:nth-child(2)  { top: .75vw; display: grid; grid-template-columns: 1fr; padding: 0 35vw 0 0;  }
         .product-details-item .tab-panel:nth-child(3) { display: grid; grid-template-columns: 1fr 1fr; padding: 0 35vw 0 0;  }
 
-        .product-details-item .tab { position: relative; border: none; width: 100%; max-width: 68vw; height: 1.9vw; background-color: transparent; }
+        .product-details-item .tab { position: relative; border: none; width: 100%; max-width: 68vw; height: 2.5vw; margin-top: -.6vw; background-color: transparent; }
 
-        .product-details-item .tab + .tab { margin-top: 0; }
+        .product-details-item .tab + .tab { margin-top: -.6vw; }
 
         .product-details-item .tab button { text-align: center; border: none; margin: 0; padding: 0; bottom: 0; left: 0; background: transparent; width: 100%; height: 100%; }
 
@@ -790,8 +806,7 @@
         
         .product-details-item .product-buy-qty { position: relative; }
 
-        .product-details-item .product-qty-input,
-        .product-details-item .product-qty-input:readonly { overflow: hidden; text-align: center; width: 10vw; border: .05vw solid var(--primary-tan-dark); }
+        .product-details-item .product-qty-input { overflow: hidden; text-align: center; width: 10vw; border: .05vw solid var(--primary-tan-dark); }
 
         .product-details-item .product-qty-increment,
         .product-details-item .product-qty-decrement { cursor: pointer; font-size: 1.25vw; position: absolute; top: 0; width: 1.75vw; height: 2.45vw; margin: 0; border: .05vw solid var(--primary-tan-dark); background-color: transparent; }

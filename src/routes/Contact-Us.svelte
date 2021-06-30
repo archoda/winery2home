@@ -28,12 +28,11 @@
     let ContactUsFormMessage = '';
     let ContactUsFormMessage2 = '';
     let ContactUsFormHoneyPot = '';
-    
+    $: ContactUsFormResponse = '';
     export let ButtonSubmitContacUsInstance;
 
     function ButtonSubmitContacUsClickCallback(detail)
     {
-        
         let ContactUsFormFirstName      = document.querySelector('[name=ContactUsFormFirstName').value;
         let ContactUsFormEmailAddress   = document.querySelector('[name=ContactUsFormEmailAddress').value;
         let ContactUsFormMessage        = document.querySelector('[name=ContactUsFormMessage').value;
@@ -69,10 +68,25 @@
             // },
         };
 
-        let result = Loader(formEndPoint, requestOptions)
+        let result = fetch(formEndPoint, requestOptions)
                         .then(response => response.text())
-                        .then(result => console.log(result))
-                        .catch(error => console.log('error', error));
+                        // .then(result => console.log(result))
+                        // .catch(error => console.log('error', error));
+                        .then(result => {
+                            
+                            if (JSON.parse(result).is_valid)
+                            {
+                                ContactUsFormResponse = $Store.Pages.ContactUs.Form.Success;
+                            }
+                            else
+                            {
+                                ContactUsFormResponse = $Store.Pages.ContactUs.Form.Error;
+                            }
+                        })
+                        .catch(error => 
+                        {
+                            ContactUsFormResponse = $Store.Pages.ContactUs.Form.Error;
+                        });
     }
 
 
@@ -83,11 +97,12 @@
                 LoaderActive: true,
                 LoaderType:  'circle',
                 LoaderClassColor: '#FFFFFF',
-                LoaderOptions: $Store.Pages.PrivacyPolicy.Loader,
+                LoaderOptions: $Store.Pages.ContactUs.Loader,
                 LoaderCompleteCallback: (_Data) =>
                 {   
                     const StoreManager = new StoreManagerClass($Store);
 
+                    console.log(_Data);
                     // Set the Wineries Data if not already set...
                     if (_Data.Responses[0].status != 200 || _Data.Responses[0].ok) 
                     {   
@@ -113,14 +128,18 @@
 
 <main id="main" class="main main-contact-us">
     <MastheadComponent class={"slide hidden"} headersmall={"Have Something To"} header={"Tell Us?"} body={"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat."}>
+        {#if ContactUsFormResponse === '' }
         <div class="form">
             <input bind:value={ContactUsFormFirstName} id="ContactUsFormFirstName" name="ContactUsFormFirstName" title="First Name" placeholder="First Name" />
             <input bind:value={ContactUsFormEmailAddress} id="ContactUsFormEmailAddress" name="ContactUsFormEmailAddress" title="Email Address" placeholder="Email Address" />
             <textarea bind:value={ContactUsFormMessage} id="ContactUsFormFormMessage" name="ContactUsFormMessage" title="Your Message" placeholder="Your Message Here"></textarea>
             <input bind:value={ContactUsFormMessage2} id="ContactUsFormMessage2" name="ContactUsFormMessage2" hidden />
             <input bind:value={ContactUsFormHoneyPot} id="ContactUsFormHoneyPot" name="ContactUsFormHoneyPot" class="honeypot" />
-            <ButtonComponent AttributeClass="button button-wine submit" AttributeTitle="Send Message" bind:this="{ButtonSubmitContacUsInstance}" on:click={ButtonSubmitContacUsClickCallback}>Send Message</ButtonComponent>
+            <ButtonComponent AttributeClass="button button-wine submit" AttributeTitle="Send Message" bind:this="{ButtonSubmitContacUsInstance}" Callback={ButtonSubmitContacUsClickCallback}>Send Message</ButtonComponent>
         </div>
+        {:else}
+            {@html ContactUsFormResponse}
+        {/if}
     </MastheadComponent>
 </main>
 

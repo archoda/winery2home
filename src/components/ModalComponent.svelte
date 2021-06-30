@@ -29,7 +29,7 @@
 
     let ModalContainerClass = '';
 
-    let ModalTabs;
+    let ModalTabs = null;
 
     $: {
         if ($Store.Modal.Active)
@@ -47,45 +47,32 @@
 
     export const ModalClose = () =>
     {
-        console.log('ModalClose Called....');
+
         Modal = document.getElementById(ModalId);
-            Modal.style.zIndex = ModalZIndexSetTop({ TargetId: ModalId });
+        Modal.style.zIndex = ModalZIndexSetTop({ TargetId: ModalId });
             
-            anime.timeline({
-                loop: false,
-            }).add({
-                targets: '#modal',
-                direction: 'forward',
-                easing: 'linear',
-                opacity: {
-                    value: [1,0],
-                    duration: 250,
-                    delay: 250,
-                },
-                delay: 0,
-                complete: () => 
-                {
+        anime.timeline({
+            loop: false,
+        })
+        .add({
+            targets: '#modal',
+            direction: 'forward',
+            easing: 'linear',
+            opacity: {
+                value: [1,0],
+                duration: 250,
+                delay: 250,
+            },
+            delay: 0,
+            complete: () => 
+            {
 
-                    ModalType = $Store.Modal.Type = '';
-                    ModalData = $Store.Modal.Data = {};
-                    ModalActive = $Store.Modal.Active = false;
+                ModalType = $Store.Modal.Type = '';
+                ModalData = $Store.Modal.Data = {};
+                ModalActive = $Store.Modal.Active = false;
 
-                }
+            }
         });
-    }
-
-    const ModalPanelGroupToggle = () => {
-
-    }
-
-    const ModalPanelGroupOpen = () =>
-    {
-        console.log('Modal PanelOpen Top Called');
-    }
-
-    const ModalPanelGroupClose = () =>
-    {   
-        ModalClose();
     }
 
     const ModalInit = () =>
@@ -107,19 +94,20 @@
                     delay: 250,
                 },
                 delay: 0,
+                beging: () =>
+                {
+                    
+                },
                 complete: () => 
                 {
-
                     ModalTabs = new TabsClass({ Target: document.querySelector('.modal') });
                     ModalTabs.TabsInit();
-                    console.log('Modal Tabs Init Called...');
-
                 }
             });
 
             clearTimeout(ModalReady);
 
-        }, 10);
+        }, 100);
     }
 
     const ModalZIndexSetTop = (_Args) =>
@@ -154,6 +142,12 @@
         return Number(ZIndexTop) + 1;
     }
 
+    const Components = () =>
+    {
+        return {
+            ModalTabs : ModalTabs
+        }
+    }
 
     onMount(() =>
     {  
@@ -170,7 +164,7 @@
     <div id="modal" class="modal {ModalClass}">
 
         {#if $Store.Modal.Type === 'WineryDetails'}
-            <CompanyComponent AttributeClass='winery-list' Callback={ModalClose} />
+            <CompanyComponent AttributeClass='winery-list' AttributeClassExtended={'winery-details'} Callback={ModalClose} Components={Components} />
         {/if}
         
         {#if $Store.Modal.Type === 'ProductDetails'}
@@ -181,28 +175,7 @@
         {/if}
 
         <div class="modal-background">
-            <!-- <ImagePictureComponent
-                ImageId={''} 
-                ImageClass='responsive-img-cover' 
-                ImageSrc={'./lib/images/_fpo_product-details-mobile.jpg'} 
-                ImageWidth={'414'} 
-                ImageHeight={'896'} 
-                ImageTitle={'Modal Background'} 
-                ImageAlt={'Modal Background'} 
-                ImageSources={ 
-                    [
-                        { 
-                            Lazy: '', 
-                            Srcset: './lib/images/_fpo_product-details-mobile.jpg, ./lib/images/_fpo_product-details-mobile@2x.jpg 2x', 
-                            Media: '(min-width: 0px) and (max-width: 767px)'
-                        },
-                        { 
-                            Lazy: '', 
-                            Srcset: './lib/images/modal-background-desktop.jpg, ./lib/images/modal-background-desktop-slide-2@2x.jpg 2x', 
-                            Media: '(min-width: 768px) and (max-width: 10000000px)'
-                        },
-                    ]
-                } /> -->
+            
             <ImagePictureComponent
                 ImageId={''} 
                 ImageClass='responsive-img-cover' 
@@ -270,11 +243,6 @@
 
     .modal-centered { display: grid; align-items: center; }
 
-    .winery-details ul,
-    .winery-details li { list-style: none; margin: 0; padding: 0; }
-
-    .winery-details li span { display: inline-block; }
-
     @media (min-width: 0) and (max-width: 767px)
     {   
 
@@ -282,15 +250,7 @@
             MODAL
         */
 
-        .modal-button-close { top: 6.5vw; right: 3vw;  }
-
-        .winery-details .list-item-icon { width: 3vw; }
-
-        .winery-details .list-item-label { margin-left: 3vw; transform: translate(0, -1.25vw); }
-
-        .winery-details .list-item-button { margin: 0; }
-    
-        .winery-details .list-item-button + .list-item-button { margin: 10vw 0 0; }
+        .modal-button-close { top: 3vw; right: 3vw; }
 
     }
 

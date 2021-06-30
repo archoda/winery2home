@@ -60,21 +60,11 @@
         .large + .small { margin: -2vw 0 0; }
         .small + .large { margin: -1vw 0 0; }
 
-        .masthead *+p { margin: -.05vw 0 0; }
+        .masthead h1 + p { margin: -.05vw 0 0; }
 
         .reverse p { margin-top: 2.05vw; }
 
         .button { margin: 5vw 0 10vw; }
-
-
-        /*
-            MODAL WINERY DETAILS MASTHEAD
-        */
-
-        .winery-details { padding: 0; }
-        .winery-details h1 { margin-bottom: 8vw; }
-        .winery-details .large { font-size: 12vw; }
-        .winery-details .small { font-size: 4.5vw; }
     }
 
     @media (min-width: $mqMinWidthDesktop) and (max-width: $mqMaxWidthDesktop)
@@ -82,15 +72,17 @@
         .masthead { padding: 21.75vw 0 0 13.25vw; width: 100%; height: auto; }
 
         h1 { margin: 0; padding: 0; }
-        h1 .small { font-size: 3vw; }
-        h1 .large { font-size: 6.5vw; margin: -.55vw 0 0; }
+        h1 .small { font-size: 2vw; }
+        h1 .large { font-size: 6vw; margin: -.15vw 0 0; }
         
-        .masthead *+p { width: 70%; margin: 0 26vw 0 0; }
+        .masthead h1 + p { width: 35vw; margin: 0; }
 
         .reverse p { margin-top: 1.5vw; }
 
         .button { margin: 2vw 0; }
 
         .center { text-align: center; padding: 11.35vw 0 0 0vw; }
+
+        .masthead.center h1 + p { width: 35vw; margin: 0 auto; }
     }
 </style>

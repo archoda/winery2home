@@ -1,27 +1,20 @@
 <script>
+    
     /*
         Imports
     */
+    
     import { onMount, beforeUpdate, afterUpdate, createEventDispatcher } from 'svelte';
     import { Store } from '../lib/js/store.js';
 
-
     import ProductComponent from '../components/Product.svelte';
-    import ImageComponent from './ImageComponent.svelte';
-
-    // Import Swiper
-    // import SwiperCore, { Virtual, Navigation, Pagination, Scrollbar, A11y } from 'swiper/core';
-    // import { Swiper, SwiperSlide, } from 'swiper/svelte';
-    
-    // // Install Swiper modules
-    // SwiperCore.use([Virtual, Navigation, Pagination, Scrollbar, A11y]);
-
-    // // // Create array with 1000 slides
-    // const virtualSlides = Array.from({ length: 1000 }).map((el, index) => `Slide ${index + 1}`);
+    import ImageComponent from '../components/ImageComponent.svelte';
+import { time_ranges_to_array } from 'svelte/internal';
 
     /*
        Exports
     */
+    
     export let AttributeId = '';
     export let AttributeClass = '';
     export let AttributeClassExtended = '';
@@ -30,26 +23,17 @@
     export let Products;
     export let ProductDisplayType = '';
     export let ProductsPerView = [];
+    
+    let ProductCarousel;
 
     let ProductInitCount = 0;
-
-    let ProductCarousel;
-    let ProductCarouselProgress;
-    let ProductCarouselTarget;
-    let ProductCarouselPrev = null;
-    let ProductCarouselNext = null;
-    $: ProductCarouselSlide = 1;
-    $: ProductCarouselCount = 3;
-    let ProductCarouselOptions = null;
-    
 
     let ScreenWidth = 0;
 
     const ProductCarouselResize = (_Args) =>
     {
 
-        ProductCarousel = new Swiper('.swiper-container', {
-            loop: false,
+        ProductCarousel = new Swiper('.product-carousel', {
             slidesPerView: 1,
             shortSwipes: true,
             preventClicks: true,
@@ -61,20 +45,19 @@
             breakpoints: {
                 // when window width is >= 320px
                 0: {
+                    loop: (Products.length > 1),
                     slidesPerView: ProductsPerView[0],
                     spaceBetween: 0
                 },
                 // when window width is >= 480px
                 768: {
+                    loop: false,
                     slidesPerView: ProductsPerView[1],
                     spaceBetween: 0,
                 },
             }
         });
 
-        // ProductCarousel.on('click', (Event) => { console.log('Swiper Click'); return false; });
-
-        // console.log('resize called...');
     }
 
     const ProductInitCallback = () => 
@@ -85,17 +68,22 @@
         {
             let ProductCarouselReady = setInterval(() => 
             {
-                // if (window.Swiper)
-                // {
-                    
-                    
-
+                if ((ScreenWidth <= 767 && ProductInitCount >= 1) || (ScreenWidth >= 768 && ProductInitCount >= 4))
+                {
+                    document.querySelector('main').classList.remove('center');
                     ProductCarouselResize(true);
                     window.onresize = ProductCarouselResize;
-
-                    console.log('Swiper Set OnEvents', ProductCarousel);
-                    clearInterval(ProductCarouselReady);
-               //}
+                }
+                else
+                {
+                    if (ScreenWidth >= 768 && ProductInitCount < 3)
+                    {
+                        document.querySelector('main').classList.add('center');
+                    }
+                }
+                
+                clearInterval(ProductCarouselReady);
+            
             }, 10);
 
         }
@@ -104,7 +92,7 @@
 
     onMount( () => 
     {
-        
+
     });
 
     afterUpdate( () => 
@@ -123,9 +111,26 @@
 
 <div id="{AttributeId}" class="{AttributeClass} {AttributeClassExtended}" {...AttributeDataset}>
 
-    <!-- <Swiper slidesPerView={ProductCarouselCount}> -->
     <!-- Slider main container -->
-    <div class="swiper-container">
+    <div class="swiper-container product-carousel">
+        <!-- <button class="product-carousel-carousel-next hidden">
+            <ImageComponent
+                ImageClass={['product-carousel-carousel-next']} 
+                ImageSrc={'/lib/images/icon-button-next.svg'} 
+                ImageWidth={'150'} ImageHeight={'150'}
+                ImageTitle={'Next Arrow Graphical Icon'}
+                ImageAlt={'Next Arrow Graphical Icon'} 
+                ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
+        </button>
+        <button class="product-carousel-carousel-prev hidden">
+            <ImageComponent
+                ImageClass={['product-carousel-carousel-previous']} 
+                ImageSrc={'/lib/images/icon-button-prev.svg'} 
+                ImageWidth={'150'} ImageHeight={'150'}
+                ImageTitle={'Previous Arrow Graphical Icon'}
+                ImageAlt={'Previous Arrow Graphical Icon'} 
+                ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
+        </button> -->
         <!-- Additional required wrapper -->
         <div class="swiper-wrapper">
 
@@ -148,59 +153,26 @@
         
         </div>
     </div>
-    <!-- </Swiper> -->
 
-    <!-- <button class="products-carousel-prev">
-        <ImageComponent ImageClass={['product-prev']} ImageSrc={$Store.API.Root + '/lib/images/product-carousel-prev.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Left facing arrow'} ImageAlt={'Left facing arrow'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
-    </button>
-    <button class="products-carousel-next">
-        <ImageComponent ImageClass={['product-next']} ImageSrc={$Store.API.Root + '/lib/images/product-carousel-next.svg'} ImageWidth={'400'} ImageHeight={'400'} ImageTitle={'Left facing arrow'} ImageAlt={'Left facing arrow'} ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
-    </button>
-    <div class="products-carousel">
-    {#if Products !== [] } 
-        {#each Products as Product}
-            <ProductComponent AttributeClass={AttributeClass + ' products-carousel-cell'} Winery={Product.winery.name} Id={Product.winery.id} WPId={Product.winery.wpid} Region={Product.winery.region} Product={Product} ProductDisplayType={ProductDisplayType} ProductInitCallback={ProductInitCallback} />
-        {/each}
-    {:else}
-        We're sorry. No products are available at this time. Please check back soon.
-    {/if}
-    </div>
-    <slot /> -->
+    <slot />
+
 </div>
 
 <style global lang="scss">
     
-    // @import 'swiper/swiper.scss';
-    // @import 'swiper/components/navigation/navigation.scss';
-    // @import 'swiper/components/pagination/pagination.scss';
-    // @import 'swiper/components/scrollbar/scrollbar.scss';
-
     .products { position: relative;  height: auto; }
 
     @media (min-width: 0px) and (max-width: 767px)
     {  
 
-        /*
-            HOME
-        */
-
-        /*
-            SHOP
-        */
-
     }
 
     @media (min-width: 768px) and (max-width: 100000000px)
     { 
-
-        /*
-            HOME
-        */
-
-        /*
-            SHOP
-        */
-
-    }
+        .main-shop.center .masthead p { text-align: center; }
+        .main-shop.center .swiper-wrapper { justify-content: center; }
+        .main-shop.center .swiper-slide { width: auto; }
+        .main-shop.center .swiper-slide .product-buy { text-align: left; }
+    } 
 
 </style>

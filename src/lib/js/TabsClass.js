@@ -7,8 +7,20 @@ export default class TabsClass
         this.Target = $_Args.Target;
     }
 
-    TabsToggle(_Args, Event)
+    
+    TabsToggleCallbackAfter(TabPanel)
     {
+        // Do something...
+    }
+
+    TabsToggleCallbackBefore(TabPanel)
+    {
+        // Do something...
+    }
+
+    TabsToggle(_Args, Event)
+    { 
+        let TabClass = _Args.TabClass;
         let TabGroup = _Args.TabGroup;
         let TabGroupIndex = _Args.TabGroupIndex;
         let TabControl = _Args.TabControl;
@@ -31,7 +43,7 @@ export default class TabsClass
         });
 
         TabPanels.forEach((TabPanel, TabPanelIndex) =>
-        {      
+        {   
             TabPanel.querySelectorAll('.tab-panel').forEach((Panel, PanelIndex) =>
             {
                 
@@ -46,8 +58,9 @@ export default class TabsClass
                         direction: 'forward',
                         easing: 'linear',
                         loop: false,
-                        complete: () => {
-                            Panel.style.display = 'none';
+                        complete: () => 
+                        {
+                            Panel.style.transform = "translate(-1000000000vw, -1000000000vw)";
                             Panel.style.opacity = 0;
                         }
                     });
@@ -67,10 +80,12 @@ export default class TabsClass
                         begin: () =>
                         {
                             Panel.removeAttribute('style');
-                            //Panel.style.display = 'block';
+                            TabClass.TabsToggleCallbackBefore(Panel);
                         },
-                        complete: () => {
+                        complete: () =>
+                        {
                             Panel.style.opacity = 1;
+                            TabClass.TabsToggleCallbackAfter(Panel);
                         }
                     });
 
@@ -82,9 +97,11 @@ export default class TabsClass
 
     };
 
-    TabsInit()
+    TabsInit(_Args)
     {   
-        let TabTransitionSpeed = 500;
+
+        let TabTransitionSpeed = (_Args?.TransitionSpeed) ? _Args?.TransitionSpeed : 500;
+
         let TabGroups = this.Target.querySelectorAll('.tab-group');
        
         TabGroups.forEach((TabGroup, TabGroupIndex) => {
@@ -95,6 +112,7 @@ export default class TabsClass
             TabControl.querySelectorAll('li').forEach((TabButton, TabButtonIndex) =>
             {
                 let TabGroupData = {
+                        TabClass: this,
                         TabGroupIndex: TabGroupIndex,
                         TabGroup: TabGroup,
                         TabButton: TabButton,

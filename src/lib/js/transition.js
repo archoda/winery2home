@@ -4,7 +4,7 @@ import { shouldNavigate, hostMatches } from "svelte-routing/src/utils.js";
 const transitionTriggerMethod = (event, bipass = false) =>
 {
     const anchor = event.currentTarget;
-    
+    console.log('transitionTriggerMethod method', bipass, event)
     if ( bipass === true || (anchor.target !== "_blank" && hostMatches(anchor) && shouldNavigate(event) )) {
         
         // Perform Page Transistion
@@ -30,12 +30,14 @@ const transition = (node) =>
 
     function onClick(event)
     {
-        // console.log('Use Transition Click Triggered for Node', event.target);
+        console.log('Use Transition Click Triggered for Node', event.target);
         
         transitionTriggerMethod(event);
 
         event.preventDefault();
         event.stopPropagation();
+
+        return false;
     }
 
     // Bind the event listener

@@ -391,7 +391,7 @@ class Archoda
 
         // Init the query
         $WP_Query = new WP_Query($WP_Query_Args);
- 
+
         //return $WP_Query;
         // Set Response
         if (count($WP_Query->posts) <= 0)
@@ -400,13 +400,19 @@ class Archoda
             $WP_Query_Response = new WP_Error( 'error', 'The search results Product could not be found.', array('status' => 404) );
         }
         else
-        {
+        {   
             // Fill Wine Posts Data
             foreach($WP_Query->posts as $WP_Post)
             {
-                
+
                 $WP_Post_Winery = get_fields($WP_Post->ID);
+                
+                // Only use activated companies
+                if (!array_key_exists('activated', $WP_Post_Winery)) continue;
+                if (strtolower($WP_Post_Winery['activated']) !== 'true') continue;
+                
                 $WP_Post_Winery_WPId = $WP_Post->ID;
+                $WP_Post_Winery_Activated = $WP_Post_Winery['activated'];
                 $WP_Post_Winery_Id = $WP_Post_Winery['id'];
                 $WP_Post_Winery_Name = $WP_Post_Winery['name'];
                 $WP_Post_Winery_City = $WP_Post_Winery['city'];
@@ -415,6 +421,7 @@ class Archoda
                 $WP_Post_Winery_Explore = $WP_Post_Winery['explore'];
 
                 array_push($WP_Query_Results, array(
+                    'activated' => $WP_Post_Winery_Activated,
                     'wpid' => $WP_Post_Winery_WPId,
                     'id' => $WP_Post_Winery_Id,
                     'name' => $WP_Post_Winery_Name,
@@ -499,7 +506,13 @@ class Archoda
             foreach($WP_Query->posts as $WP_Post)
             {
                 $WP_Post_Winery = get_fields($WP_Post->ID);
+
+                // Only use activated companies
+                if (!array_key_exists('activated', $WP_Post_Winery)) continue;
+                if (strtolower($WP_Post_Winery['activated']) !== 'true') continue;
+
                 $WP_Post_Winery_WPId = $WP_Post->ID;
+                $WP_Post_Winery_Activated = $WP_Post_Winery['activated'];
                 $WP_Post_Winery_Id = $WP_Post_Winery['id'];
                 $WP_Post_Winery_Name = $WP_Post_Winery['name'];
                 $WP_Post_Winery_Region = $WP_Post_Winery['region'];
@@ -507,9 +520,14 @@ class Archoda
                 // Filter only one feature wine per-product (only looks for one, then stops)
                 foreach($WP_Post_Winery['products'] as $WP_Post_Winery_Product)
                 {
+                    // Only use activated companies
+                    if (!array_key_exists('activated', $WP_Post_Winery_Product)) continue;
+                    if (strtolower($WP_Post_Winery_Product['activated']) !== 'true') continue;
+                    
                     if ($WP_Post_Winery_Product['featured'])
                     {
                         $WP_Post_Winery_Product['winery'] = array(
+                            'activated', $WP_Post_Winery_Activated,
                             'wpid' => $WP_Post_Winery_WPId,
                             'id' => $WP_Post_Winery_Id,
                             'name' => $WP_Post_Winery_Name,
@@ -603,7 +621,13 @@ class Archoda
             foreach($WP_Query->posts as $WP_Post)
             {
                 $WP_Post_Winery = get_fields($WP_Post->ID);
+
+                // Only use activated companies
+                if (!array_key_exists('activated', $WP_Post_Winery)) continue;
+                if (strtolower($WP_Post_Winery['activated']) !== 'true') continue;
+                
                 $WP_Post_Winery_WPId = $WP_Post->ID;
+                $WP_Post_Winery_Activated = $WP_Post_Winery['activated'];
                 $WP_Post_Winery_Id = $WP_Post_Winery['id'];
                 $WP_Post_Winery_Name = $WP_Post_Winery['name'];
                 $WP_Post_Winery_Region = $WP_Post_Winery['region'];
@@ -611,6 +635,10 @@ class Archoda
                 // Filter wines by varietal
                 foreach($WP_Post_Winery['products'] as $WP_Post_Winery_Product)
                 {
+                    // Only use activated companies
+                    if (!array_key_exists('activated', $WP_Post_Winery_Product)) continue;
+                    if (strtolower($WP_Post_Winery_Product['activated']) !== 'true') continue;
+                    
                     $WP_Post_Winery_Product_Filter_Valid = false;
                     
                     // Filter valid by varietal when required
@@ -633,6 +661,7 @@ class Archoda
                     {
                         // Append Winery info 
                         $WP_Post_Winery_Product['winery'] = array(
+                            'activated' => $WP_Post_Winery_Activated,
                             'wpid' => $WP_Post_Winery_WPId,
                             'id' => $WP_Post_Winery_Id,
                             'name' => $WP_Post_Winery_Name,

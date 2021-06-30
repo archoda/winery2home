@@ -13,7 +13,7 @@
     import { Store } from '../lib/js/store.js';
     import StoreManagerClass from '../lib/js/StoreManagerClass.js';
     import anime from 'animejs';
-    import { transition } from '../lib/js/transition.js';
+    import { transition, transitionTriggerMethod } from '../lib/js/transition.js';
 
     /* 
         Import Page/Routes
@@ -36,6 +36,7 @@
 
     import Loader from '../components/Loader.svelte';
     import ModalComponent from '../components/ModalComponent.svelte';
+    import ImageComponent from '../components/ImageComponent.svelte';
     import ButtonMenu from '../components/Button-Menu.svelte';
     import ButtonComponent from '../components/ButtonComponent.svelte';
     import ButtonCloseComponent from '../components/ButtonCloseComponent.svelte';
@@ -54,7 +55,7 @@
 
     // Set the session host;
     let SessionHost = window.location.protocol + '//' + window.location.hostname + ((window.location.port) ? ':' + window.location.port : ''); 
-    console.log(SessionHost = 'https://07cbeb1f6efc.ngrok.io');
+    console.log(SessionHost = 'https://94f1385d756e.ngrok.io');
     
     // Set the session mode;
     let SessionMode = 'Browser';
@@ -78,6 +79,46 @@
                 All: [], // Filled during session runtime(s)
                 Featured: [], // Filled during session runtime(s)
                 Filtered: [],
+                Varietals: [
+                    {
+                        Name: 'Red',
+                        Types: [
+                            'Barbera',
+                            'Barolo/Barbaresco',
+                            'Beaujolais',
+                            'Bourgogne',
+                            'Bordeaux',
+                            'Cabernet Franc',
+                            'Cabernet Sauvignon',
+                            'Carménère',
+                            'Chianti',
+                            'Grenache/Garnacha',
+                            'Malbec',
+                            'Merlot',
+                            'Nebbiolo',
+                            'Pinot Noir',
+                            'Sangiovese',
+                            'Syrah/Shiraz',
+                            'Zinfandel'
+                        ],
+                    },
+                    {
+                        Name: 'White',
+                        Types: [
+                            'Albariño',
+                            'Chablis',
+                            'Chardonnay',
+                            'Chenin Blanc',
+                            'Moscato',
+                            'Pinot Gris/Grigio',
+                            'Prosecco',
+                            'Riesling',
+                            'Sauvignon Blanc',
+                            'Traminer',
+                            'Viognier'
+                        ]
+                    }
+                ],
                 Maps: 
                 [ 
                     /* Source: https://discovercaliforniawines.com/wine-map-winery-directory/ */
@@ -93,20 +134,37 @@
                             { Key: 'CA-FN', Value: 'California, Far North', Wineries: [] },
                         ],
                     },
-                    { 
-                        Name: 'Washington',
-                        Active: false,
-                        Regions: [
-                            { Key: 'WA-NC-Lake', Value: 'Washington, Lake', Wineries: [] },
-                        ],
-                    },
-                    { 
-                        Name: 'Oregon',
-                        Active: false,
-                        Regions: [
-                            { Key: 'OR-NC-Lake', Value: 'Oregon, Lake', Wineries: [] },
-                        ]
-                    }
+                    /* Source: https://www.gotastewine.com/wa-ava-map.htm */
+                    // { 
+                    //     Name: 'Washington',
+                    //     Active: false,
+                    //     Regions: [
+                    //         { Key: 'WA-AL', Value: 'Washington, Ancient Lakes', Wineries: [] },
+                    //         { Key: 'WA-CG', Value: 'Washington, Columbia Gorge', Wineries: [] },
+                    //         { Key: 'WA-HHH', Value: 'Washington, Horse Heaven Hills', Wineries: [] },
+                    //         { Key: 'WA-CV', Value: 'Washington, Columbia Valley', Wineries: [] },
+                    //         { Key: 'WA-LC', Value: 'Washington, Lake Chelan', Wineries: [] },
+                    //         { Key: 'WA-NH', Value: 'Washington, Naches Heights', Wineries: [] },
+                    //         { Key: 'WA-PS', Value: 'Washington, Puget Sound', Wineries: [] },
+                    //         { Key: 'WA-RH', Value: 'Washington, Rattlesnake Hills', Wineries: [] },
+                    //         { Key: 'WA-RM', Value: 'Washington, Red Mountain', Wineries: [] },
+                    //         { Key: 'WA-SM', Value: 'Washington, Snipes Mountain', Wineries: [] },
+                    //         { Key: 'WA-WS', Value: 'Washington, Wahluke Slope', Wineries: [] },
+                    //         { Key: 'WA-WWV', Value: 'Washington, Walla Walla Valley', Wineries: [] },
+                    //         { Key: 'WA-YV', Value: 'Washington, Yakima Valley', Wineries: [] },
+                    //     ],
+                    // },
+                    // { 
+                    //     Name: 'Oregon',
+                    //     Active: false,
+                    //     Regions: [
+                    //         { Key: 'OR-CV', Value: 'Oregon, Columbia Valley', Wineries: [] },
+                    //         { Key: 'OR-WV', Value: 'Oregon, Willamette Valley', Wineries: [] },
+                    //         { Key: 'OR-SRV', Value: 'Oregon, Snake River Valley', Wineries: [] },
+                    //         { Key: 'OR-UV', Value: 'Oregon, Umpqua Valley', Wineries: [] },
+                    //         { Key: 'OR-RV', Value: 'Oregon, Rogue Valley', Wineries: [] },
+                    //     ]
+                    // }
                 ]
             }
         },
@@ -193,7 +251,7 @@
                 Path: '/how-it-works',
                 Title: 'How It Works',
                 Description: 'How It Works',
-                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/featured/1/false'] }],
+                Loader: [{ Url: '' }],
             },
             AboutUs: {
                 Name: 'About Us',
@@ -201,7 +259,7 @@
                 Path: '/about-us',
                 Title: 'About Us',
                 Description: 'About Us',
-                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/featured/1/false'] }],
+                Loader: [{ Url: '' }],
             },
             ContactUs: {
                 Name: 'Conctact Us',
@@ -209,7 +267,12 @@
                 Path: '/contact-us',
                 Title: 'Contact Us Us',
                 Description: 'Contact Us',
-                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/featured/1/false'] }],
+                Form:  {
+                    Label: 'Send Message',
+                    Success: '<p>Thank you. Someone from Winery2Home will review your message soon.</p>',
+                    Error: 'We\'re sorry. Your message could not be processed at this time - please try again soon.',
+                },
+                Loader: [{ Url: '' }],
             },
             AgeCheck: {
                 Name: 'Age Check',
@@ -217,7 +280,7 @@
                 Path: '/age-check',
                 Title: 'Age Check',
                 Description: 'To visit our website you must be old enough to purchase and consume alcohol under the laws of your country of residence.',
-                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/featured/1/false'] }],
+                Loader: [{ Url: '' }],
             },
             AgeCheckDenied: {
                 Name: 'Age Check Denied',
@@ -225,7 +288,7 @@
                 Path: '/age-check-denied',
                 Title: 'Age Check Denied',
                 Description: 'Your access has been denied due to not being of legal drinking age within your home country.',
-                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/featured/1/false'] }],
+                Loader: [{ Url: '' }],
             },
             PrivacyPolicy: {
                 Name: 'Privacy Policy',
@@ -233,7 +296,7 @@
                 Path: '/privacy-policy',
                 Title: 'Privacy Policy',
                 Description: 'Privacy Policy',
-                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/featured/1/false'] }],
+                Loader: [{ Url: '' }],
             },
             TermsOfService: {
                 Name: 'Terms of Service',
@@ -241,7 +304,7 @@
                 Path: '/terms-of-service',
                 Title: 'Terms of Service',
                 Description: 'Terms of Service',
-                Loader: [{ Url: [SessionHost + '/wp/wp-json/wineries/products/featured/1/false'] }],
+                Loader: [{ Url: '' }],
             }
         },
         animations: {
@@ -296,8 +359,7 @@
         }
         else
         {
-            console.log(SnipcartContainer);
-            SnipcartContainer.style.zIndex = 100000;
+            //SnipcartContainer.style.zIndex = 100000;
         }
     }
 
@@ -309,26 +371,44 @@
             https://docs.snipcart.com/v3/sdk/events
         */
 
-        Snipcart.events.on('cart.created', async (cartItem) =>
-        {   
-            // On Mobile - change the header span
-            document.querySelector('.snipcart-cart-header .snipcart-modal__header-summary-title span').innerHTML = 'Oder Details';
+        let Snipcart = document.querySelector('.snipcart');
+        let SnipcartButtonClose = document.querySelector('.snipcart-button-close');
+
+        SnipcartButtonClose.addEventListener('click', (Event) => 
+        {
+            SnipcartCheckoutCallback(Event);
         });
 
-        Snipcart.events.on('item.updated', async (cartItem) =>
+        document.addEventListener('DOMSubtreeModified', (Event) =>
         {
-            console.log('Snipcart Event => Item Updated');
+
+            let SnipcartContainer = document.querySelector('.snipcart-modal__container');
+        
+            if (SnipcartContainer)
+            {
+                SnipcartButtonClose.classList.add('active');
+            }
+            else
+            {
+                SnipcartButtonClose.classList.remove('active');
+            }
+        
         });
 
-        Snipcart.events.on('item.added', async (cartItem) =>
-        {
-            console.log('Snipcart Event => Item Added');
-        });
+        // Snipcart.events.on('item.updated', async (cartItem) =>
+        // {
+        //     //console.log('Snipcart Event => Item Updated');
+        // });
 
-        Snipcart.events.on('item.removed', async (cartItem) =>
-        {
-            console.log('Snipcart Event => Item Removed');
-        });
+        // Snipcart.events.on('item.added', async (cartItem) =>
+        // {
+        //     //console.log('Snipcart Event => Item Added');
+        // });
+
+        // Snipcart.events.on('item.removed', async (cartItem) =>
+        // {
+        //     //console.log('Snipcart Event => Item Removed');
+        // });
 
         // Snipcart.events.on('cart.reset', (cartState) => 
         // {
@@ -463,12 +543,17 @@
     {
 
         NavMainToggle();
+
+        //Event.stopPropagation();
+        
+        return false;
     }
 
+    
     onMount(async () =>
     {
         return () => {
-            console.log('Home Page UnMount....');
+            console.log('Index UnMount....');
         }
     });
 
@@ -491,17 +576,8 @@
 <svelte:head>
 
     <!-- SNIPCART -->
-    <link rel="stylesheet" href="https://cdn.snipcart.com/themes/v3.2.0/default/snipcart.css" />
+    <link rel="preload stylesheet" as="style" type="text/css" href="https://cdn.snipcart.com/themes/v3.2.0/default/snipcart.css" />
     <script async src="https://cdn.snipcart.com/themes/v3.2.0/default/snipcart.js"></script>
-    <style>
-
-        :root {
-            .snipcart-button-primary
-            {
-                background-color: var(--bgColor-buttonPrimary,#1a4db3);
-            }
-        }
-    </style>
     <!-- HOTJAR -->
 	<!-- <script>
 		(function(h,o,t,j,a,r){
@@ -523,21 +599,8 @@
 
         gtag('config', 'UA-163724990-1');
 	</script> -->
-
-    <!-- FLICKITY -->
-    <script type="text/javascript" src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-    <link rel="preload stylesheet" as="style" type="text/css" href="https://unpkg.com/swiper/swiper-bundle.min.css">
-
 </svelte:head>
 
-<!-- OnionSkin -->
-<!-- <div id="os" class="os">
-    <picture>
-        <source srcset="./lib/images/_onionskin-home-desktop.png" media="(min-width: 768px)" />
-        <source srcset="./lib/images/_onionskin-home-mobile.png" />
-        <img src="./lib/images/_onionskin-home-mobile.jpg" alt="onionskin"/>
-    </picture>
-</div> -->
 
 <ModalComponent />
 
@@ -547,8 +610,33 @@
 {/if}
 
 <!-- NAVIGATION: Button Toggle -->
-<ButtonMenu classColor={"#900A4A"} on:click={ButtonMenuInstanceClickCallback} />
-<ButtonComponent AttributeId={''} AttributeClass={'snipcart-checkout'} AttributeTitle={'snipcart-checkout'} Callback={SnipcartCheckoutCallback}>Checkout Open <span class="snipcart-items-count"></span></ButtonComponent>
+<ButtonComponent id={'nav-menu'} AttributeClass={'nav-menu'} Callback={ButtonMenuInstanceClickCallback}>
+    <ImageComponent 
+        ImageClass={['icon-hamburger-menu']} 
+        ImageSrc={'/lib/images/icon-hamburger-menu.svg'} 
+        ImageWidth='28.86px' ImageHeight='18.4' 
+        ImageTitle='Hamburger Menu' 
+        ImageAlt='Hamburger Menu' 
+        ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } /> 
+</ButtonComponent>
+
+<ButtonComponent id={'nav-checkout'} AttributeClass={'nav-checkout snipcart-checkout'} AttributeTitle={'snipcart-checkout'} Callback={SnipcartCheckoutCallback}>
+    <span class="nav-checkout-count snipcart-items-count"></span>
+    <ImageComponent 
+    ImageClass={['nav-checkout-icon-badge']} 
+    ImageSrc={'/lib/images/icon-badge.svg'} 
+    ImageWidth='28.86px' ImageHeight='18.4' 
+    ImageTitle='Shopping Cart Item Count' 
+    ImageAlt='Shopping Cart Item Count' 
+    ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
+    <ImageComponent 
+        ImageClass={['icon-shopping-cart']} 
+        ImageSrc={'/lib/images/icon-shopping-cart.svg'} 
+        ImageWidth='28.86px' ImageHeight='18.4' 
+        ImageTitle='Shopping Cart Checkout' 
+        ImageAlt='Shopping Cart Checkout' 
+        ImageSources={ [{ Lazy: '', Srcset: '', Media: '' }] } />
+</ButtonComponent>
 
 
 
@@ -625,6 +713,8 @@
     data-cart-custom1-options="true|false"
     data-cart-custom1-required="true" -->
 <div class="snipcart-wrapper-checkout">
+    <ButtonCloseComponent AttributeId={'snipcart-button-close'} AttributeClass={'snipcart-button-close'} AttributeTitle={'Checkout Close'} on:click={SnipcartCheckoutCallback} />   
+
     <div id="snipcart" data-config-modal-style="full" data-api-key="OTdhZmI1OGEtNmE1Ny00NWEwLTgwNDUtZDlkZjdmYzUyMWUwNjM3NTA0ODYxMTExODQ3MDE4" hidden >
         <payment section="top">
             <fieldset class="snipcart-form__set">
@@ -840,7 +930,7 @@
     h4,h5,h6 { font-variation-settings: 'wght' 400 !important; }
     
     
-    * *:last-of-type:is(p) { padding-bottom: 0; }
+    * *:last-of-type:is(p) { margin-bottom: 0; padding-bottom: 0; }
 
     a, a:active, a:visited, a:focus { color: var(--primary-black); text-decoration: none; border: none; outline: none; outline-style: none; -moz-outline-style: none; }
 
@@ -879,15 +969,38 @@
         GLOBAL SNIPCART
     */
     
-    .snipcart-wrapper-checkout { position: absolute; z-index: 90; top: 0; right: 0; }
+    .snipcart-wrapper-checkout { position: absolute; z-index: 90; top: 0; right: 0; width: 100%; height: auto;  }
+    .snipcart-button-close { position: absolute; z-index: 89; opacity: 0; display: none; }
+    .snipcart-button-close.active { opacity: 1; display: block; }
+
     .snipcart-cart-header .snipcart-cart-header__icon:nth-child(1),
     .snipcart-cart-header .snipcart-modal__close-icon,
     .snipcart-cart-header .snipcart-cart-header__count { display: none; }
 
     @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
     {
-        .snipcart-cart-header .snipcart-modal__header-summary-title { margin-right: 19vw; }
-        .snipcart-cart-header .snipcart-modal__header-summary-title span { content: "Order Summary"; }
+        .snipcart-button-close { top: 4vw; right: 4vw; }
+
+        .snipcart-wrapper-checkout .snipcart-cart-header { padding-top: 11vw; }
+
+        .snipcart-wrapper-checkout .snipcart-modal__header-summary { margin: -5vw 10vw 0 0; }
+        
+        .snipcart-wrapper-checkout .snipcart-cart-header .snipcart-modal__header-summary-title { margin-right: 19vw; }
+        // .snipcart-wrapper-checkout .snipcart-cart-header .snipcart-modal__header-summary-title span { content: "Order Summary"; }
+
+
+        .snipcart-wrapper-checkout .snipcart-item-line__media { margin-right: 8vw; }
+    }
+
+    @media (min-width: $mqMinWidthDesktop) and (max-width: $mqMaxWidthDesktop)
+    {
+        .snipcart-button-close { top: 1.5vw; right: 2vw; width: 4vw; }
+
+        .snipcart-wrapper-checkout .snipcart-cart-header { padding-top: 3vw; }
+
+        .snipcart-wrapper-checkout .snipcart-item-line__media { margin-right: 4vw; min-width: auto; }
+
+        .snipcart-wrapper-checkout .snipcart-item-line__image { width: 1.5vw; }
     }
 
     /*
@@ -919,7 +1032,7 @@
 
     @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
     {
-        .footer { bottom: -1vw; } 
+        .footer { bottom: 1.5vw; } 
 
         .footer *:not(a),
         .footer a, .footer a * { font-size: 2.5vw; }
@@ -937,6 +1050,12 @@
         GLOBAL NAV
     */
 
+    .nav-menu,
+    .nav-checkout { z-index: 3; position: fixed; }
+
+    .nav-checkout-count,
+    .nav-checkout-icon-badge { position: fixed;}
+
     #nav { z-index: 2000; position: fixed; top: 0; left: 0; margin-left: -100000000vw; display: flex; width: 100%; height: 100%; background-color: var(--primary-tan); align-items: center; justify-content: center; flex-flow: column; }
 
     #nav ul,
@@ -948,6 +1067,12 @@
 
     @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
     {
+
+        .nav-menu { top: 7vw; right: 4vw; width: 12vw; }
+        .nav-checkout { top: 7vw; right: 18.5vw; width: 12vw; }
+        
+        .nav-checkout .nav-checkout-count { font-size: 2.75vw; color: var(--primary-white); z-index: 2; top: 6.3vw; right: 17.95vw; width: 4.5vw; }
+        .nav-checkout .nav-checkout-icon-badge { z-index: 1; top: 5.25vw; right: 17.75vw; width: 5vw; height: 5vw; display: grid; align-items: center; text-align: center; }
 
         #nav ul:first-of-type li + li { margin-top: 4vw; }
 
@@ -966,6 +1091,12 @@
 
     @media (min-width: $mqMinWidthDesktop) and (max-width: $mqMaxWidthDesktop)
     {   
+
+        .nav-menu { top: 2.75vw; right: 2.5vw; width: 3vw; }
+        .nav-checkout { top: 2.75vw; right: 6.75vw; width: 3vw; }
+        
+        .nav-checkout .nav-checkout-count { font-size: .85vw; color: var(--primary-white); z-index: 2; top: 2.4vw; right: 6vw; width: 1.5vw; }
+        .nav-checkout .nav-checkout-icon-badge { z-index: 1; top: 2.15vw; right: 6vw; width: 1.5vw; height: 1.5vw; display: grid; align-items: center; text-align: center; }
 
         #nav { display: grid; grid-template-columns: 1fr 1fr; }
 
@@ -1005,7 +1136,7 @@
         // .form { margin: 0 19vw; }
 
         .form input,
-        .form textarea { font-size: 4vw; text-align: center; padding: 1.25vw 2vw;  }
+        .form textarea { font-size: 4vw; text-align: center; padding: 1.45vw 2vw;  }
 
         .form * + input,
         .form * + textarea { margin-top: 2vw; }
@@ -1018,9 +1149,14 @@
     {   
         // .form { margin: -2vw 22vw 0; }
 
-        .form input { font-size: 1.25vw; padding: .5vw .5vw; width: 14vw; }
+        .form input,
+        .form textarea { font-size: 1.25vw; padding: .5vw .5vw; width: 14vw; }
+
+        .form input { width: 14vw; }
 
         .form input + input { margin-top: 2vw; }
+
+        .form textarea { width: 28.2vw; display: block; margin-top: 1vw; }
 
         .form button { margin-top: 1vw; }
     }
@@ -1055,22 +1191,6 @@
         // .main { text-align: left; padding: 0 4vw 0vw; overflow: scroll; }
 
         .button { font-size: 1.2vw; padding: 0.5vw 1.25vw; }
-    }
-
-    /* 
-        GLOBAL MODAL   
-    */
-    
-    .modal { }
-
-    /*
-        GLOBAL PRODUCTS
-    */
-
-    @media (min-width: $mqMinWidthMobile) and (max-width: $mqMaxWidthMobile)
-    { 
-        
-
     }
 
 </style>

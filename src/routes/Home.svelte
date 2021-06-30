@@ -168,7 +168,6 @@
                         ? Number(new RegExp(/#tab=(\d+){0,}/g).exec(window.location.hash)[1])
                         : 0;
                     
-                        console.log('Home Page Tab To Load: ', TabAutoIndexByHash);
                     TabsToggle({
                             TabGroupIndex: TabGroupIndex,
                             TabGroup: TabGroup,
@@ -284,13 +283,13 @@
             LoaderCompleteCallback: (_Data) =>
             {   
                 const StoreManager = new StoreManagerClass($Store);
-
+                
                 // Set the Wineries Data if not already set...
                 if (_Data.Responses[0].status != 200 || _Data.Responses[0].ok) 
                 {   
 
                     // Load & Store the Wineries List
-                    $Store.API.Wineries.List = _Data.Results[1]; console.log('Wineries List', $Store.API.Wineries.List);
+                    $Store.API.Wineries.List = _Data.Results[1];
 
                     // Load & Store the featured Products
                     Products = $Store.API.Wineries.Featured = StoreManager.WineriesFilteredByFeaturedSet(_Data.Results[0], true);
@@ -317,10 +316,19 @@
     
     <title>{ $Store.Pages.Home.Title }| { $Store.Pages.Base.Title }</title>
 	<meta name="description" property="description" content="{ $Store.Pages.Home.Description }">
+    
+    {#if ScreenWidth >= 768 }
+        <!-- <link rel="preload" href="./lib/images/home-background-mobile-slide-1@2x.jpg" as="image"> -->
+    {:else if ScreenWidth <= 767 }
+        <!-- <link rel="preload" href="./lib/images/home-background-dekstop-slide-1.jpg" as="image"> -->
+    {/if}
+     <!-- FLICKITY -->
+     <script async type="text/javascript" src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+     <link rel="preload stylesheet" as="style" type="text/css" href="https://unpkg.com/swiper/swiper-bundle.min.css">
 
 </svelte:head>
 
-<svelte:window bind:outerWidth={ScreenWidth}/>
+<svelte:window bind:outerWidth={ScreenWidth} />
 
 <main id="main" class="main main-home">
 
@@ -343,7 +351,6 @@
                 </div>
                 <div>
                     <MapComponent AttributeClass={'map-home'}></MapComponent>
-                    <button id="threejsmap" class="winery">Region Test</button>
                     {#if ScreenWidth <= 767 }
                         <LinkComponent AttributeClass={"button button-wine white-text"} AttributeHref={'/shop'} AttributeTitle={'Shop All Wines'}>Shop All Wines</LinkComponent>
                     {/if}
@@ -387,7 +394,7 @@
                 <ImagePictureComponent
                 ImageId={''} 
                 ImageClass='responsive-img-cover' 
-                ImageSrc={'./lib/images/home-background-mobile-slide-2.jpg'} 
+                ImageSrc={'./lib/images/home-slide-2-mobile.jpg'} 
                 ImageWidth={'414'} 
                 ImageHeight={'896'} 
                 ImageTitle={'Image Background'} 
@@ -396,12 +403,12 @@
                     [
                         { 
                             Lazy: '', 
-                            Srcset: './lib/images/home-background-mobile-slide-2.jpg, ./lib/images/home-background-mobile-slide-2@2x.jpg 2x', 
+                            Srcset: './lib/images/home-slide-2-mobile.jpg, ./lib/images/home-slide-2-mobile@2x.jpg 2x', 
                             Media: '(min-width: 0px) and (max-width: 767px)'
                         },
                         { 
                             Lazy: '', 
-                            Srcset: './lib/images/home-background-desktop-slide-2.jpg, ./lib/images/home-background-desktop-slide-2@2x.jpg 2x', 
+                            Srcset: './lib/images/home-slide-2-desktop.jpg, ./lib/images/home-slide-2-desktop@2x.jpg 2x', 
                             Media: '(min-width: 768px) and (max-width: 10000000px)'
                         },
                     ]
@@ -411,7 +418,7 @@
                 <ImagePictureComponent
                 ImageId={''} 
                 ImageClass='responsive-img-cover' 
-                ImageSrc={'./lib/images/home-background-mobile-slide-2.jpg'} 
+                ImageSrc={'./lib/images/home-slide-2-mobile.jpg'} 
                 ImageWidth={'414'} 
                 ImageHeight={'896'} 
                 ImageTitle={'Image Background'} 
@@ -420,12 +427,12 @@
                     [
                         { 
                             Lazy: '', 
-                            Srcset: './lib/images/home-background-mobile-slide-2.jpg, ./lib/images/home-background-mobile-slide-2@2x.jpg 2x', 
+                            Srcset: './lib/images/home-slide-2-mobile.jpg, ./lib/images/home-slide-2-mobile@2x.jpg 2x', 
                             Media: '(min-width: 0px) and (max-width: 767px)'
                         },
                         { 
                             Lazy: '', 
-                            Srcset: './lib/images/home-background-desktop-slide-2.jpg, ./lib/images/home-background-desktop-slide-2@2x.jpg 2x', 
+                            Srcset: './lib/images/home-slide-2-desktop.jpg, ./lib/images/home-slide-2-desktop@2x.jpg 2x', 
                             Media: '(min-width: 768px) and (max-width: 10000000px)'
                         },
                     ]
